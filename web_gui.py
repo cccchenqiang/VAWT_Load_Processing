@@ -122,6 +122,16 @@ def run_analysis(filepath, mode="both", include_panel=False,
         "validation": validation,
     }
 
+    STATE["progress"] = 38
+    STATE["status"] = "方位角载荷分析..."
+    try:
+        from azimuth_analysis import analyze_azimuth_loads
+        results["azimuth"] = analyze_azimuth_loads(df, mapper)
+    except Exception as e:
+        logger.warning(f"方位角载荷分析失败: {e}")
+        results["azimuth"] = {"bins": 36, "blade_results": {}, "phase_relationships": [],
+                              "error": str(e)}
+
     # 概览指标
     gc = config.global_ch
     if gc.inst_torque_col in df.columns:

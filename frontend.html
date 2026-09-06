@@ -524,6 +524,7 @@ tr:hover { background: #fafafa; }
 
         <div class="tab" onclick="switchTab('timeseries')">时序图表</div>
         <div class="tab" onclick="switchTab('tower')">塔顶载荷分析</div>
+        <div class="tab" onclick="switchTab('azimuth')">方位角分析</div>
         <div class="tab" onclick="switchTab('batch')">批处理</div>
 
         <div class="tab" onclick="switchTab('fast')">FAST 载荷</div>
@@ -646,6 +647,13 @@ tr:hover { background: #fafafa; }
         <div id="towerExtremeTable">暂无数据</div>
         <h4 style="font-size:13px; margin:16px 0 8px 0;">塔顶载荷时序</h4>
         <div class="chart-container" id="towerChart" style="height:360px;"></div>
+      </div>
+
+      <div class="tab-content" id="tab-azimuth">
+        <h3 style="font-size:14px; margin-bottom:10px;">叶片方位角载荷分析</h3>
+        <div class="info-box" id="azimuthInfo">分析完成后显示方位角分箱、周期和相位结果</div>
+        <div id="azimuthPhaseTable">暂无数据</div>
+        <div id="azimuthTables"></div>
       </div>
 
       <!-- 批处理标签页 -->
@@ -1401,7 +1409,39 @@ function renderResults() {
 
   // 塔顶载荷分析
   if (results.tower_top && Object.keys(results.tower_top).length) renderTower();
+  if (results.azimuth) renderAzimuth();
 
+}
+
+function renderAzimuth() {
+  const az = results.azimuth || {};
+  const info = document.getElementById('azimuthInfo');
+  const tables = document.getElementById('azimuthTables');
+  const phaseEl = document.getElementById('azimuthPhaseTable');
+  if (!info || !tables || !phaseEl) return;
+  if (az.error) {
+    info.textContent = '方位角分析失败: ' + az.error;
+    return;
+  }
+  const blades = az.blade_results || {};
+  info.textContent = `分箱数: ${az.bins || '-'}，每箱 ${(360 / (az.bins || 36)).toFixed(1)}°`;
+  phaseEl.innerHTML = '<h4 style="font-size:13px; margin:12px 0 6px;">叶片相位关系</h4>' +
+    envTable(az.phase_relationships || []);
+  let html = '';
+  Object.keys(blades).forEach(bid => {
+    const b = blades[bid];
+    html += `<h4 style="font-size:13px; margin:14px 0 6px; color:#1565c0;">${bid} 周期特征</h4>`;
+    const periodic = Object.keys(b.periodic || {}).map(name => ({
+      通道: name, 均值: b.periodic[name].mean, 一阶幅值: b.periodic[name].amplitude,
+      一阶相位_deg: b.periodic[name].phase_deg, 样本数: b.periodic[name].samples
+    }));
+    html += envTable(periodic);
+    Object.keys(b.statistics || {}).forEach(name => {
+      html += `<h5 style="font-size:12px; margin:8px 0 4px;">${name} 方位角分箱统计</h5>`;
+      html += envTable(b.statistics[name]);
+    });
+  });
+  tables.innerHTML = html || '<div class="info-box">未找到带方位角的叶片载荷通道</div>';
 }
 
 
