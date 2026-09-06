@@ -1,0 +1,3028 @@
+
+
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>垂直轴风轮载荷数据处理系统</title>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #2c3e50; }
+
+.header { background: linear-gradient(135deg, #1a237e, #1565c0); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+
+.header-left h1 { font-size: 20px; font-weight: 600; }
+
+.header-left p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+.header-logo { height: 46px; max-width: 240px; background: rgba(255,255,255,0.95); border-radius: 6px; padding: 4px 10px; display: flex; align-items: center; }
+
+.header-logo img { height: 100%; width: auto; }
+
+.project-name { background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; padding: 10px 12px; margin-bottom: 16px; }
+
+.project-name .label { font-size: 11px; color: #1565c0; font-weight: 600; margin-bottom: 4px; }
+
+.project-name .value { font-size: 14px; font-weight: 600; color: #0d47a1; word-break: break-all; }
+
+html, body { margin: 0; }
+body { min-height: 100vh; }
+.container { display: flex; gap: 16px; padding: 16px; height: calc(100vh - 70px - 36px); }
+
+.sidebar { width: 300px; background: white; border-radius: 8px; padding: 16px; overflow-y: auto; flex-shrink: 0; }
+
+.main { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+
+.section { margin-bottom: 20px; }
+
+.section-title { font-size: 14px; font-weight: 600; color: #1565c0; margin-bottom: 10px; padding-left: 8px; border-left: 3px solid #1565c0; }
+
+.form-group { margin-bottom: 10px; }
+
+.form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+
+.form-group input[type="text"], .form-group select { width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+
+.form-group input[type="number"] { width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+
+.checkbox-group { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; }
+
+.radio-group { display: flex; flex-direction: column; gap: 6px; }
+
+.radio-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+
+.btn-primary { background: #1565c0; color: white; width: 100%; }
+
+.btn-primary:hover { background: #0d47a1; }
+
+.btn-primary:disabled { background: #90caf9; cursor: not-allowed; }
+
+.btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+
+.btn-secondary:hover { background: #e0e0e0; }
+
+.file-input { display: flex; gap: 6px; }
+
+.file-input input { flex: 1; }
+
+.preview-box { background: #f8f9fa; border-radius: 4px; padding: 10px; font-size: 11px; font-family: Consolas, monospace; white-space: pre-wrap; max-height: 120px; overflow-y: auto; color: #555; }
+
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.card { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+.card-label { font-size: 12px; color: #888; }
+
+.card-value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+
+.card-value.blue { color: #1565c0; }
+
+.card-value.orange { color: #ef6c00; }
+
+.card-value.green { color: #2e7d32; }
+
+.card-value.red { color: #c62828; }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; }
+
+.tab { padding: 10px 20px; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+
+.tab.active { color: #1565c0; border-bottom-color: #1565c0; font-weight: 600; }
+
+.tab-content { flex: 1; background: white; border-radius: 0 0 8px 8px; padding: 16px; overflow-y: auto; display: none; }
+
+.tab-content.active { display: block; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+th { background: #f5f5f5; padding: 8px; text-align: center; font-weight: 600; border: 1px solid #e0e0e0; }
+
+td { padding: 6px 8px; text-align: center; border: 1px solid #eee; }
+
+tr:hover { background: #fafafa; }
+
+.chart-row { display: flex; gap: 16px; margin-top: 12px; }
+
+.chart-box { flex: 1; min-width: 0; }
+
+.chart-container { width: 100%; height: 300px; }
+
+.info-box { background: #f8f9fa; border-radius: 4px; padding: 12px; font-size: 12px; line-height: 1.8; margin-top: 12px; }
+
+.progress-bar { width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+
+.progress-fill { height: 100%; background: linear-gradient(90deg, #1565c0, #42a5f5); transition: width 0.3s; border-radius: 3px; }
+
+.status-text { font-size: 12px; color: #666; margin-top: 6px; }
+
+.log-box { background: #1e1e1e; color: #d4d4d4; border-radius: 4px; padding: 10px; font-size: 11px; font-family: Consolas, monospace; height: 150px; overflow-y: auto; margin-top: 10px; }
+
+.channel-select { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+
+.channel-select select { flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
+
+.highlight { color: #c62828; font-weight: 600; }
+
+/* 文件浏览器模态框 */
+
+.modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; display:none; justify-content:center; align-items:center; }
+
+.modal-overlay.active { display: flex; }
+
+.modal-box { background:white; border-radius:8px; width:640px; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+
+.modal-header { padding:14px 18px; border-bottom:1px solid #e0e0e0; display:flex; justify-content:space-between; align-items:center; }
+
+.modal-header h3 { font-size:15px; color:#2c3e50; }
+
+.modal-close { cursor:pointer; font-size:20px; color:#999; border:none; background:none; }
+
+.modal-close:hover { color:#333; }
+
+.modal-path { padding:10px 18px; background:#f8f9fa; border-bottom:1px solid #e0e0e0; display:flex; gap:8px; align-items:center; }
+
+.modal-path select { padding:4px 8px; border:1px solid #ddd; border-radius:4px; font-size:12px; }
+
+.modal-path input { flex:1; padding:5px 8px; border:1px solid #ddd; border-radius:4px; font-size:12px; font-family:Consolas,monospace; }
+
+.modal-body { flex:1; overflow-y:auto; padding:8px 0; }
+
+.file-item { display:flex; align-items:center; padding:7px 18px; cursor:pointer; font-size:13px; border-bottom:1px solid #f5f5f5; }
+
+.file-item:hover { background:#e3f2fd; }
+
+.file-item .icon { margin-right:10px; font-size:16px; }
+
+.file-item .name { flex:1; }
+
+.file-item .size { color:#999; font-size:11px; font-family:Consolas,monospace; }
+
+.file-item.dir .name { color:#1565c0; font-weight:500; }
+
+.modal-footer { padding:12px 18px; border-top:1px solid #e0e0e0; display:flex; justify-content:space-between; align-items:center; }
+
+.modal-footer .selected-path { font-size:12px; color:#666; font-family:Consolas,monospace; flex:1; margin-right:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.layout-btn { padding:4px 12px; font-size:12px; }
+
+.layout-btn.active { background:#1565c0; color:#fff; border-color:#1565c0; }
+
+.view-panel { margin-bottom:12px; }
+
+.view-panel-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+
+.view-panel-header label { font-size:12px; color:#666; white-space:nowrap; }
+
+.view-panel-header select { flex:1; padding:4px 8px; font-size:12px; }
+
+.view-grid-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.view-chart { height:320px; }
+
+.view-stats { font-size:13px; color:#333; margin-top:4px; padding:4px 8px; background:#f5f5f5; border-radius:4px; }
+
+.mini-stats-row { width:100%; border-collapse:collapse; font-size:13px; }
+
+.mini-stats-row td { padding:4px 14px 4px 0; white-space:nowrap; color:#333; font-family:Consolas,monospace; }
+
+.synth-table { border-collapse:collapse; margin-top:6px; font-size:13px; }
+
+.synth-table th, .synth-table td { border:1px solid #ddd; padding:6px 14px; text-align:left; }
+
+.synth-table th { background:#e3f2fd; font-weight:600; }
+
+.synth-table td:first-child { font-weight:500; white-space:nowrap; }
+
+.synth-file-info { margin-top:8px; padding:6px 10px; background:#f5f5f5; border-radius:4px; font-size:13px; color:#555; }
+
+.export-box { background:#f8f9fa; border:1px solid #e0e0e0; border-radius:6px; padding:10px; }
+
+.export-box .export-title { font-size:12px; font-weight:600; color:#1565c0; margin-bottom:8px; }
+
+.export-ch-list { max-height:120px; overflow-y:auto; border:1px solid #e0e0e0; border-radius:4px; padding:6px; background:white; margin-bottom:8px; }
+
+.export-ch-list label { display:block; font-size:12px; padding:2px 0; cursor:pointer; }
+
+.export-ch-list label input { margin-right:4px; }
+
+.export-row { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+
+.export-row select { flex:1; padding:4px 8px; font-size:12px; }
+
+.export-row button { flex-shrink:0; }
+
+/* ===== 关键参数醒目样式 ===== */
+.k-max { font-weight: 700; color: #c62828; }
+.k-min { font-weight: 700; color: #1565c0; }
+.k-peak { font-weight: 700; color: #ef6c00; }
+.k-val  { font-weight: 700; color: #2e7d32; }
+.k-time { font-weight: 600; color: #616161; }
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div class="header">
+
+  <div class="header-left">
+
+    <h1>垂直轴风轮载荷数据处理系统</h1>
+
+    <p>QBlade仿真输出 | 极限载荷分析(EOG/NTM/EWS全工况) | 疲劳载荷分析 | 多叶片解耦与合成</p>
+
+  </div>
+
+  <div class="header-logo">
+
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAogAAADSCAIAAABGoaZVAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAgAElEQVR4nOydd0ATyRfHN4UECL33XqQoilKsKCJ27L2X01PvznKWs57ds5z1rGfvevaGKChgQRFBpPfeW4AQ0vf3x2rY7CYhkADB33z+0OwwuzskYd/Mm/e+jwDDMAQAAAAAAEA5IHb0AAAAAAAAADQBDDMAAAAAAEoEMMwAAAAAACgRwDADAAAAAKBEAMMMAAAAAIASAQwzAAAAAABKBDDMAAAAAAAoEcAwAwAAAACgRADDDAAAAACAEgEMMwAAAAAASgQwzAAAAAAAKBHAMAMAAAAAoEQAwwwAAAAAgBIBDDMAAAAAAEoEMMwAAAAAACgRwDADAAAAAKBEAMMMAAAAAIASAQwzAAAAAABKBDDMAAAAAAAoEcAwAwAAAACgRADDDAAAAACAEgEMMwAAAAAASgQwzAAAAAAAKBHAMAMAAAAAoEQAwwwAAAAAgBIBDDMAAAAAAEoEMMwAAAAAACgRwDADAAAAAKBEAMMMAAAAAIASAQwzAAAAAABKBDDMAAAAAAAoEcAwAwAAAACgRADDDAAAAACAEgEMMwAAAAAASgQwzDLB5wv4fEFHjwIAAAAAPz7kjh6AslDXwM4qrM0ooGcV0ovKGXQGu47Brm3g1DHYtQxOI5sHQRCRSKCqkFTIRBUykUQiUshEHU2qgY6agY6avraagY6qgY6agbaavo6ajZmWrqZqR/9OrefSk6TT9772dDH27GLcs4uRq50+mdTxczgOl59TVAtBkLONXkePBQAAANoKAgzDHT2GDkAggJOyq6KTSlJza7IK6RkF9Ep6o2Jvoa+t6mSl62Sl62St62ip42Sla6xPU+wt2ggYhvsuuJlTXCdsCT46rruTUQcO6bf9r2LTynOL6/gCeFBPy+u7RrTn3VkcXnhMofDQ1lzb2Vq3Te/4Lr4oJCrPRF/dSE/dWE/d282USiG16R0BAIDy8H+0YoZhOCWn+l188buvRR8SSmoZnDa9XVUtKyqhJCqhRNiirUHxcDTs62Hep5tpd2cjZViDiiX4fS7aKg/2tupYqwxBUHU9O6uwFnkdl1beznevqWPP2x4iPFwyoduWn3q36R3PPUwMfp+LvPZ1N721ZySXx2/dpYgEAklZv2kAAEAsP75hptezH0VmRcQWRn0trqlnd+BIahmcyLiiyLgiCILUqGRvN5M+3cyUzUizOfwdZz+gW1bP7Nlxw/mGj5tJWHQ+8prOYGcX1dqZa3f0oNqK3OLakA95wsMPiSXWo8+2+mrDettc+HOogoYGAADagx/WMAsEcERs4Y0XqSFRuRyuvHFbJCKBSCQQCQQCAeLxYZ7cgWCNbF5EbGFEbCEEQRrqKiP72k0KcOzTzYxAIMh5ZTk5eTc+t0S5lssQBGF2AeLSyn9gw3zkZpxA8P+4wQQAABB+QMOcW1x780Xa7dD0ksoGGU/R11a1t9BxsNQxM9TQ1aTqaqrqaFJ1tai6mqq6WlRNdQreXgoEMJvLp9ezq+tYNXWs6lpWFfLi+7/l1czckjomi9fs3RlM7q2XabdeppkZ0MYNcpw02LFNg5sClt6pZUj0HJRWMdGHn5PLvGZfa+kt7u0LsjTRlN6HyeLee50p4wVTcqrRh3fDMpBwvGaxNdPq62EuvU9cWrn0rwpd1NGSXVz77F2O9Gv6e1mqUlrzx5WaW30nLKMVJwIAgB+GHyr4K/h9zpl7CR8SS6R301BX8XEz6WKj72ipY2+h7WCpq6NJbaMhVdQwc4rrcoprc4vrcktqc4rqknOquLxmFtzu9vrTh7nMGNaFoqL4kB+XiRfpkg2zQnh3bmqzK9rC8nqv2dfbdBgQBI0b6HDij8HS+yza/fJxZLZi7xt7daapQYtj/RrZvGG/3UvPq0EO1ahkQ101OUcysKfl3l/7y3kRAADQnvwgK+Yv6eXbznyQYpLVVcm+7qZ9Pcx6dzPr5mDQbuEwhrrqhrrq3m4mwhY2h5+YVfk5tSwmpSw2pbyogoE/KzGrasPxtyfufFkzy2uivyOR2MH+bUD7sPVMlNAqQxD016/9Jwc4deSAAABAR9DpDXNhef2eC9GSnKJmBrQpgc6Dvaw8nAyVJMCKSiH1dDHu6WK8aBwEQVBpVcPnlLLXMQVP3mZjAsULyxjLD7w+/t+XP+Z4De9j22EjBrQLT95mX36aLDx0tdULGmDH4bYyGBuBTCKCWR0A0OnoxIaZzxccvRV35EYcG/fwUiETh/WxmT60y4AeFkr+YDLRp43sZzeyn93uZf3CPuXff5354kMe+jdKz6uZv/2FZxejgyv8FLL3rEmj8HGxRQIYbmjkolvUVckkYiunMiTlfs+lQCYRTQzUMY0CPlyM2oTWVKdoa1IwfThcQXk1E2otLz/mLdsbhm5Jzqm2DTrX6gsinPxj8NiBDnJeBAAAtDOd1TCXVDYs2xuGzhJGcLDQmT3SdcJgRz2tTia8RVEhDe9jO7yPLYPJefou57/Q9HfxxcKfxqaWj1hx/9ga/xF95V06R1+ajm88dTd+279NWVI6GtTPV2eoq6rIeS8pGOmqPzk0VkqH2NTyLaffCw+XTPQY2fLfXU+7ZV8DWzOtyH+nYBpLKhs8Z14VHs4c3gWfx/wxsWTs6kctHR5C6Me8+dtfyB/qj6ejY/wBAEBr6JSG+XVMwbK9YZikZG0NytrZXnNGunZ2OQUNdcqUIc5Thji/jinYcup9ZiEdaWeyeAt2vFgxzXPt7F6KzapicXgn7sSjW2aNdEGscnk1Mza1SdDD2lTTxVZfITelqJB6uhhL6ZBXWoc+7NnFSHr/zoutubYqlcRgAjF2AAAAdUrD/Dgya+neV+jlBYEAzRjm8sdcL31teUNYlYpBvSxfnZp49mHiwWufGcxvfubDN2Krahv3/TZAgTe6FpxSUdOkSKpCJi4Ickdex6aWo0Wv5ge571raV4G3lkJ1LQt92Iog586CvYXO4VUDF+58iaQMWJtoKerK2hptlW4AAADajk5mmG+9TFt1KAItv9DD2WjPL/08HA07dFxthQqZtGSCx5gB9jM2B6fmfsvlvfIsxdpEa9nk7gq5BYfLP/6fyHJ5rJ+9Msh6V4iql5sowZDajpH97JZM6HbxSfLtPaN6OHe8ogsAAOhAOpNhfvEhd8Xf4eiWoAH2x9YMQif7FlUwBPzvZvu7u5fQ9IIAQZAKiaijSZUlRZhez+by+ATCN9kvRP+LQICQQ+G/8vxSRRWM8mpmJb1RjUrW0aSaG2mgy1IVVzA4XL6NmfbDv4Pmb38h3HXefTHa38tSIV7lGyGpGHmNxRM85L+s/CRkVKIPKSokenOKqlo0ipwfR3Ud68DVGExjA1MkLO5Tchm+T1G5mLS3FrFhvo+/l5WFkUZFTeuDyNCoUcka6tggNQAAoPx0GsNcUFr/24HX6JbZI133LOuHeRAv3PGipp6dV1KHuwAWPS1Vzy5GXq4mvl1NvVyNxe7aLv0rLDatrNlyFwQChLbTBAJEIhKPr/Mf4mMttn8jm/f8fW7Yp/zIuEK0DxnBwlhjUE/LHs5GalTyjrMf5oxy+21qDy0a9fK2YQFL7yDlJQQC+M8zUbf3jGr215QOl8f/5/YXdEtfDzM3O8XsIssJplhF16mXmz0l0Nf69IaA1kluIVTVsv6++ll6n5iUspiUslbfQhJkEnHf5U+fkhV25RnDuhxY4aeoqwEAgHajcxhmDpe/aPdLtIGUVOEn+Oh4CII2HH974XESul1dlbxyuqeztZ5AAJdWNaTmVr/8mB8anR8anQ9BUFcHg9Uzew7xscaY5+u7RrA4vF/2vnoqKsHobq8/bpAjl8vn8gRsLp/D5XN4AiaLm5xdlZhVhfQRuyfK5fFP/Bd/4k58XcO334VEJIwb5ODnaeFqq08iEgrK6kM+5D17l3PlWQrSwcZU6/uvoHJ83eDRKx8gyU5v4ooKSuubVb6Uzn+hGYWiSz03O/3n3+saQRAUly5iHfNL69A/xeNqp2eliC3SnOLaVsiTvfiQN23Ds0vbhmrRwN4qxOP/OKJ+AMD/FZ3DMF8NTvmSXiE8HNjTYvNCXyn9xw9ywBjmgyv9xviJJHTu+QVKzq7afTE6LDo/IbNyztaQYb1tTq0PwBS+VaWQ7Syw6pLbFvXp42Em9taPI7MW7Q5FG1QhRRWMWVuChbLPRCJhor/jyumeNmZN13e20QvwsV43x2vy+idITyvTJtPbw9loZD+7R5FZyGFYTP7cUW5S3odm+ed2HKblzP2EM/cTJPUXTmUksePnPgvHdpVnSAjoUPAW8SGxZMfZj/uXKzI4rt1QrDyuQADCvAGATkknMMxsDv/YrSb7Yair9s9af+n5Qvll9ZgWbzdTfDdXO/0r24advBO/49xHCIKeR+XO3fb8wp9DMb5Q9JwAobuzxFiz0QPsHa/EVNexMNt71XWsaRueZhR8y31SIRMvbxs2sKel2IsY6Kjd3Tfae851BpNrLWrgx/jZCw1zRj5d0jBkpC20uBWCPEWX5ZE30dWkzhjugmlsaOSi53k9nI364qZlJZUNd1/JW3xCsStcsGIGADopncAwXw9JRZc8WjHNs9m0KEwxIh0NqqRkGwKBsHRS9y/pFY/fZEMQFP658J/bX1bP7CXsAMNw0nfvNIKpAU268kYvV2MWW0SMjMniztwcLLTKJCLh9IYASVYZQVdTdYi3ddinfHQsGJJDJXzNl1uSwsfdNA0lzqw8fETJnvfrbv7HHC/ksxBaL2Rx+a0Fhn7eE1r2XXiLpt56XRQDHbWN830wjSWVDWjD7Otugu/zMbFEfsO8ZlavqlpszIHs0OvZG0+8Ex7ywIoZAOicdALDfOtFmvC1qQFtxjDsggZPSo6IKe3SnJLl5oW+z6NykaJP5x4krpjmKRTWrqhprK4TSah1tW3magdXDsS0/LwnDL0E3LW0ryza10N8rIXqIkLUqGQ1KhkpeiiPBULwcTdB6zMrCbGpZYmoydD4QQ7NSosIUF5gWlsKlrUpfp4W8pxeUcNEG2Y5dbYBAEBHoeyGuZbB/prZ5Eke3d8OswcsFsyKuYuNrvT+lsaaXq4m778WQxBEZ7CjE0uFW8gpudWYzlKSlO6+ynCw1MEkVcckl778mCc8tDPXnjXCtdlfAYIgLQ2Kk5WYkQuVtD3lTnj172V1UmpVxK8ZFSfvfhUeDuppOXmItHpH3RSRUP7vg6ZNbhKRICm4HQ26PLOG3POVTgrmT0OWWuAAAEAJUXbD/P5rMToiBu3IlUQtg10smpjb7IoZ2ThEDDMEQSm5VULDnCy6+IYgyFWCYebzBXsuRB9dPQjTfkw0H+nXKd1lzLUd7GU12MsK05hdVIvoq5BJRDkXWBAE6WhSpRc5UKWQ0YbZ1ly7rYsilFY1PHnTFAM/tLeNgU7zgm5oI6Sh1vrkXRiG2BzsQpPLE2nhC2B8n7ZQum4pmNgIYJgBgE6KshtmTMKol6uJ5L7fSMWtcWUxzOaGTZvQiE/729VysFcT68rm8vh/X/1cVMHoIvrTtLyaFx+alssWRhoTB8tVYTfq++zBx91EUfIRMAzP3Rbi7WqyaHxXFXILwsHexBX27mam2Hqa/z5IQBu5WSOa37lgc/hoMTgNtdavmDML6TZBZ6X3kR643oFQVEiqFBLr+6SByeI2dwYAAFBGlN0wV6BK6dHUVGgyPHOTcaZUFsPcgHqKoQ0z3pX9KDKL/F4krbmeyQ39mJdRQDfRV8dUtboRkoo+HNHXVk4z9vB7SPbP47vJcx00Z+4nvPiQ9+JD3q2XabuW9u3fQ6aF+Ik78TvOfnCz09+/fICiVCRTc6vP3GuyeVYmmrJ4BRiNIgow8m+9d14MddULvqckYOp4AgCAzoKyG2b03qGMFZUwK2ZTA5osUv7VdU1yFsIVG58vSBcNWiaTiNeep/IFMAzDfD7MF8A8vkA4SLyXOyNf5PQ+3cRnP8tIdFLpm7giJFA5QIadV1lIyKzcfeEj8jqjgD55/VNZKlWcf5S44+wHCIKSsqtGrrj/xxzv36b2kHMkAgG86lAEerk8Y5iLLHW0KkXV0zpv8Jf8GOs1GWYGExhmAKBTouyGWRe1AGUwufR6to5mM1YWG5Jt3fxyGYKgpKwmZWbfrt+SnnOK69iioa3+XpaXtg7DnFtW1bDqUMSrmAJ8XFh2US360N5CR5bBSAKRaCYQoD9/kqavIjuF5fUztwRzuE22kEQkjOrfTMT414wKdPQvDEN7LkZnFNQcWO4nS2ieJLaeiULHrutqUueMkilKrlxUXPr/NvgLMczC10J1OQAA0LlQdsNsZy6iuvUlvVx6+i8Mwxjnc7Mh2Yj6h7A+hJkBzee7Ggnej+1oKeZqxvq01bN6vYopcLXDTgKKKkQEL2E5NCQuP01Glsub5vu42xu0+jpC6hrYMzYHl1eLWLWti3r37trMsr6bo+G/m4asPBiOXpPdCcvILa678OdQWWK18By7FYcOxoYgaNWMnjJWLSwXXTG3dI9526I+6Mx1sQz79Z7QLzI10HnJxGbqfBjqdkwFUiOUYebxBTX1LEwePAAAUH6U3TCPH+S489xH/vfQnrdfiqUb5sJyBsaD10WGEkz3X2cIbzF2kIMwajoVF5LtaCV+yUsmEY301Ls7YbdaqRQSese6oKxerGlvlkcRWX/88waCoLED7ZdOUkDBRw6XP2/bC4yjfoK/o4yCmqP62bnY6E3d8BQttR2TUjb8t3u3/xpla4YVMZUCDMOHrsfuvyJSr8nWTEvG5TIEQZ+SStGHLY2JMzWgmULN1JREO9R1Nali09iUAfSKGanQZWmiGRad72qr72KnB4w0ANApUGQ8bVtgpKce4NOUMnQtOEV6rKmYkGzrZp6h9Hr2wWuxyGstGmXuyCb1afyKWdITuauDQfz1WZj1PZKPhD5snYhm+OeCX/a/gmGoh7MRRr0kIrZw+sZnLZUAg2F41aEIYXoYAhLGhekpkCzfbG+h8+DvMbZmIoqhheWMaRufVdJlla+qqWfN2hKMscoQBG1a4CtjfHhSdtW15yIRdrJECLY1f1/7POmPJ5PXP5m8/smjiKx2u6+xvohhjksrD36Xs/nU+wnrHrtOurT51DvJpwIAAGVB2VfMEARNH9olJOpbxhGdwb74JHmpZEciRlqESCQ4NWeY/7oYjWh7EQjQqfUB6HpNKbgAbwcZNonfxBUa6qojoeBudvqFZU1ryvuvMxe3MJr66dvsX/e/5vIEvbuZXt46TI3a9JF9SS+fvz1kwzxvUksivZEYK4x+pI4G9fyWQOTi778WV9ex6hs4eSV1/4WmS7mUuaHGgwNjJq1/gl5555XUzd0W8uTQ2GZHcvNF6l8XP5VVY8sPj+5vN6KvmH1uNod/9kGCp4uRrqaquiq5pLLhVUzBmXtf0fFiVBUS+i3qKO69yhCGFwz1VUyYniw4i0ZUHLv9BZ2EbdCcli0AAFAGOv4R1iyDvawcLXWEQtMHrsQEeFtJWrmm5Io4n21MtaRX5737KuPSd03KTfN90AImTBY3V7Sus6kBTZPWjJs0KqF4yoan5zYHIoY5aIC9cFYBQVB8RsXbL0X9uptLvwhCJb1xw/G3iIj3YG+rs5uGoH+XtLyamZuDvVxN5ge5y3I1Ib/uf3XvdSa6hUCATq4fLCzXGJdavvP8R7HnkknYGGkjPfV7+0ZP3fBUKKJJUSEuly1Cu5bBwVtlF1u9w79jNU0RqBRSWEy+pLEhuLZ9MemU3OryaqaBjpokoZg7YenooD+bljj25cTVVp9MIgpnKpiMqQFyK9IAAIB2oBMYZhKJeHJ9wMjl95EA6UY27+c9oU8PjxO7MErGinFKDMnm8vin733dc/ETcrhsUndMRA++uoOjZTPL5Zjk0pmbgy2NNQO/5zKNGWD/z+0v6JX3z3tCnx8bb2HUTB3lB+GZG0+8q65jEQjQ8qmeq2f2RC+L334pWrDjhb626vF1zRTawjN3tFtyTjXa579+rjd65z7Iz16S8XMQ9w7oa6vd2jNq7O8PMwroalTyxT+HymgAFo/vVlPHOnKzqXSYrib14p9DpdQImejvFPW1RNJPIQjaIrUeqEII/1zoMf2K7P2dm/PZKBAqhdTFRjcxCxsbgUxSFZVuDgAA2hRl32NGcLPTRycIpeRUT9/4jMHEZoOUVDZgoplszLBFkZFN5f9C0/0W3d51PloggPW1VS/+OXTTAh+MhfuUXIo50U6yH5vF4e27/GncmsdMFm/hmK5CI0oiEff+2h8tKlJVywpcdvdOWLrYjeGKGuaFR4kDfrq15K+w6jqWoa7ard0j183xQlvlGyGp0zY+UyETr+8c0WyhLTxeriYvj0/YvMAHmdmM6Gv76xSRBa6lsabYohFaNMpQXxux19TTUr25e6STte6NXSNatCz7Y6733NHfNvXJJOLpDQHChbtYRvW3pUouVTlnpKsw1U2xtHT2I6R3N9NmJ2GKpZeEgh9traUKAAAUBQFWbHH2tmTetpDnUbnCQw9Hw+u7RgiVtjhc/sKdL9HlIiAIsjbV2jjfR5tGYXP59Hp2YXn965iCz6nliIKjmQFt5giXBWPctWjYtJzc4tqxqx9hHK3u9vr7fhsgdGAi/5XXNL76lH//dSadwUaSaOOuzsQEBt9/nbl0bxjmFrqa1IE9Lc0MNWhq5IZGXk5xbWZBTXp+U2nIuaPdVs/shQ4fg2F4z8XoY7e+qFJId/eN9uzSTM0l6RSW1x//L37jPG98GPPZBwmbT71Ht1BVSId/Hyj94S4QwDLKgKOBYXjZ3levYvLPbQ7s69G8k3/RrpeIex+NhbHG9sV9ZKnZ1TqGLLsjdhnaLNd2DvfvhRU8b1NiU8tGr3qI1ihFPr7Xpye1KFoeAAB0FJ3JMNPr2SOW38spbtr3dbLSubJ9eHxG5cFrnzML6LIUEtBUp3h2MerlYuzlZtLXQ4zO87FbcR8SSqISStCiY7KzaFzXbYv74Nvffin67cDrEtHqGmIhEQkj+tquntULs4/OZHFXHox4FJlFIEDnNge2nRFCJFPmbguppDfS1FR0NKnebiY/je1qqKsuw6mtgccXFFcwpK+VheQU1z6Pys3Ir2E0cs0NNCyMNSyMNAd4WrRpzNeLD7lztoa06BQVMvHI74PGDeqAdeqFR4m7L0YL8waJRMLBlX5Thji3/0gAAEAr6EyGGYmHmrk5OD6jqRCkKoW0a2k/DydDdPVZ/C9FIBC0NajaGhRdTVXpq7rPKWWISSYQIAKyKkb++faS0PSagHr9/S4OljqSZDEaGrm3XqZdeZaCz+lC1jRdHQwGe1tNC3Q21sem1YZ9yv/jnzeFZQwyiXhgxQDwkG1/opNK334pkpI/hkZDTSXQ1wafPtduMJicpOyq8ppGCIa72Oq1LnseAAB0CJ3MMCMLxwU7XoR/LkQ32ppp7VraT5aikMoAvZ6dmFVZz+RwuHwOV0BTU3G21rU10xY7YyivZm469e5xZDayy3tuc6CMQd0AAAAA6Ix0PsOMBFSvPIjNxIUgaHgfm+0/92nnWJu2A4bhy0+Td1+IRkSPLY01r+4YrrSaUwAAAABQCJ3SMAvDoP65/QUzfBUycURf29kjXeWs49SxcLj8++GZZ+59FWZ/eXYxurR1WOtkqAEAAADQieishhnhc0rZ6iORYrdsHS11Zo1wnTzEScZCCEoCvZ59+Wny+UeJwoBwMom4ZGK3VTN6SldKAQAAAMCPQec2zEhA76m78QevxYoNolalkIL87Cf6O/q4m1Ik5792ODAMf0mvuB2afutFGvoX6e5keHClH76aZKu58iyZyfp2fSKBoK1JHdTTAhNuDcNwQmbls3c51XUsdVWVAZ7m/bubC5WrmSzulWcpEASZ6KuP8fsWcnzzRWotg6OhpjJjuIvwOnUN7EeR2el5NSwOj0oheTgajuxnJ4yd/pBQgg7iQ3Cy0hUGCoRE5SLKa45WOuiMo4ZG7tXgFCTbbfQAe6Tx+vPUeiZHi0aZNrSLsGctg/0wIiujoIbN4atSyB5OhiP72Uqa31x4nMQRLfGJVB2dHOAEQVBkbCEinD6st421qUj0OAzDZ+4nQDhM9WlBfvbCw8wC+uM3WaVVTKoKqZeL8RBfa+StKCirf/YuR+yQujsZ+ribFlUwnoimh1EpJDc7/V4uxkj4YX0D53pIKgRBRrrq6CDwhkbus3c5cWnlfAFsZ6491Ne6PTXIAABAq+n0hhkhv7Ru3bE3mIgwNGpUcl8PM/9elv5eVpgHawfC5vDffCkKicp9+TEPkzOtrkpeP9d7fpB7KzKDpeAx/QqmziNFhbj31/5TA7/ZMyaLu2jXy7BPBeg+1qZaN3eNQB7rlfTGrlMvI+23do9E5ET6zL+RU1xnbqgRc2UG8qPPKWWz/3yOiJALcbbWffj3GMSHsePchxP/xWOGNznA6cjqQYhgS/fpV2oZHKRi0ucrM4QSKyWVDZ4zryKv7+4d3cfDDIIgrznXCssY1qZaHy5MQ34UnVQ6d+vzmno2+vqutnoP/x4jtvyU84QL+ALGzta64acnQxC0+nAEUirj8rZhQ3xEtK9hGDYbfgZ/QV930/sHgpAOG46/vfgkGf1TBwud+weCDHTUwj8XTNv4DH86BEG/TO6+cb7P+/jiCese438qfK8Kyuq951yHIKiHs9GzI+OQn77/Wjx3a0g9SoSHTCIeWzMIyIwAAMrPD+IdtTLRurFr5KOIrCM3Y5NxlScQIc/Q6PzQ6HwIemdjqjWol2W/7uZd7Q3QJSvah0Y2LymrMiGz8m18cfjnAuH6VYgKmThukMPa2V7mhhptN4yhva0rahpjU8s5XMHqw5GeXYyRsLKd5z4iVtnCSKNPN7OU3OqEzMq8krr5O16EnZiIEcBaeTD89elJeHkWej175uZgRHFl8hAnG1Ot+68zMwroaXk1x2592bTAB4VuZAUAACAASURBVN25X3dzodapZ5dvmpEvP+QhVhmCoLJqZkRcoViZjuUHX78+OQlvaKvrWLO2BCOGdmqgs5WJ5p2wjOyi2uSc6uP/xa+b4yXpbSEQoIVjmgpfYqooSkeNSp6JchgIVeduvkhDrLK6KjlogH1+af37r8WZhfSNJ96d3hBApZAsjDQgCGKyeMg8Rl2VjMjmaGuI/F6utnoTBjvVMthn7n1lcfi3Q9N/n9lTbPJ3QyN33rZvVrlfd3NzQ41HkVmNbN7vhyO83UzM2vJ7BQAA5OcHMcwIQX72QX727+OLzz5MeB6VK8kXkFtSd+Fx0oXHScizz83OwN1e393ewN1e39FKFy85Ig8cLr+sillUwUjKrvyaURmfUZFRQMeoMgnRUFeZNcJ10biuJrg8ZoVz8c9hwmUrXwDff525bo4Xi8O7E5aByLA8PTzOSE+dy+OP+f1RXFp5Sk71l/QKjNhycWXD5lPvj/w+CHPx6yGpiFVeONZ9x899IQiaNrTL/fBMFxs9N1yRiYmDHfFp2TdfpCHibiVVDeXVzJsv0sQa5sIyxtYzUQdW+GHarwWnIFZ5yYRuW37qDUHQ5CHOjyOzXGz18QNAo0Imbv9ZjD6MLGjSKGLPvf3yW4WuqzuG9+5qBsPwir/D2Vy+j7spDMO9u5p9ujwDKSO2cOdLCIKmBnbZtbQv/joOlrpIXbWPiSUfE0vxNSqEhHzIRX79sQPtT/4RAEHQiL42p+8l9HI1RlcHBwAAyskPZZgR+niY9fEwKyitP/8o8drz1HqcpDaaWgbn/ddiYWViigrRzEDD1JBmbqhhakAzM9QwM6CZGWoY6KjRVFVoaipCxzKHy+dw+Wwun8MVcHl8BpNbUtVQWtmA/Fta1VBaxSytaqiqZUm5uxBjPfVF47rOGuHabPUqxTLU1wbxJyfnVCEi5Mjb5e1uYqSnDkGQCpkU6Gsdl1YOQVBMchnaMBMIEAxDt1+mj8BpkKXkfFOvDPC2hiDoXXwRUt8it6SuqpY1wd8R3fnA1ZiLj5OQ18FHx0MQVFrV8PpzAQRBw/rYFFcwrjxLef4+l17PxhS3RgZw7XnqcFyNyKRskQG8iSvMKqpVpZJzimura1lS1Lg4XIH92HPCw9Wzei2ZILHGKIbyaib63J1L+k4b2gWGYUR0XYtG6d3VDFGhQVzQLeVzStmSv0JLK5mIVXa01JGUOxeTXIa8GNb7m7Z5oK9NoASdcwAAoGz8gIYZwdJE889FvdfM7nXrZfqNkNSEzEpZzuJwBbkldZhqj2hUKSS+AFbUskNbgzLEx3pEX9vBXlYdEptGpXy7KZcrgCBI+HupogZDIX9zIfAFIr/1iD62qXnVWYW1q49EYi7L+h6/hsQ33QnLQFbAyHY1xjAXljHQJashCLobloF4O4b6WhdXNlx5lsLlCR5EZM4d5YbuNqq/XUJGZW5J3apDETzRT4TN+RbGpaZKhiDodmg64glANnely2Ty+U3+DFiCb0OWcxG/CAxDfAGMrMVbdCk8RRWMovBvb9SofrbbFveRVIdb+Dkqc8AjAACQxA9rmBHUVVXmjXabN9qtooYZ/rnwdUxBRGwhJiKpRbA42MDdVmCkpz68t83wvrZixbrbk4rvgWBaGhSkSBRyWFTRZCmLv+t7637/KYIqlXxsjf/IFfcr6Y2YywrzrTML6N5uJv69LHW1VIPf5Yid8Wxb3DtoQFP0MgzDt16mIQviY7e+CCOlb71IwxhmdarK0TWDxvz+sBxX1Fk4gIwCeg9no8FeVoa66k/fZueX1kt/QygqxNzHC6X3kYSRnnr89VmYRiKRYG6oUVTBqGvgsDg8JCb88I3Y3OK6QF/rQF9r2b8Ag72tJg92WrwnFIKg6OQyKcrwyKY1sohHXmQX1a49Ghnoaz26v72pQZtvlAAAAHn4wQ2zEENd9UkBTpMCnAQC+GtmxeuYAnSZqXbA3FDDw8nQw9GwTzfTnt8TXTqQ+IyK2nr2visxyOHAnhYQBNlbaDtb66bl1XxJrzh5N37MAPuU3Orrz1ORmN7BXthd3h7ORr9N6YEuqIwQ5GePhDuduPPF281kVH87Owudlx/yIHFoa1DRe+pf0isyCujIWvN+eCa6PS2vBlPb2MvVZMlED3x0d9AAOySl6vjtuF4uxmP87O0tdJ6/F5+VhEYggNDOFQIBcrc3QHeIjCus/r49oaNJHdq7yT/M4wnQ55JJBCTPbVAvy6vBKVyeYMfZj8smeWQV0o/dimOyeGGf8of1boF7maaqEuRnH/Yp/3Zoenk1c/0/b6/tHCG256Beln9d+gRB0Ik78T1djLVp1E0n3r2LL34XX2xhpGlq0IblTwAAgPz8vxhmIUQiobuTUXcno5XTe9Y1sGNSyrIKarOL6FlFtdmFteiVopyYGtC6ORp4OBoi9rgVhZPblGG/3hO+7u5kOG6gI7L9uXtZvwlrH0MQtP3fD9v//SDss2K6p1jdsVUzer78mIeJhO/d1WxEX9tn73KyCmv7/3SLTCIKl3fWzYXBC53eK6Z5WhprQhD0NaPi0tNkCIJuvUzbstAX03/tLK/Q6HxMHe5+3c2H+Fi//JiXnk/vu+CmyABMpQ2AxxcE/nJXeEhRIeY9/gnd4eyDROFrV1s9tGGurmOhzxUuoFfP7Bn8PqeqlnX+UeL5R02nr5/r3YpcuDWzez2IyORwBa9iCqKTSr3dTPB9ujkazhjW5drz1PzS+iHLmobk2cUo0Nca3x8AACgV/3eGGY0Wjerfy8q/V1NLI5uXW1ybWVibXUjPLqrNKa6l17PrmRxGI7ehkYsO81YhE9VVyRpqFCM9dTMDmqkhzdRAw8yAZmpAMzWgmejTlHN7T0udItwAJhIIJgY0fy/LldM8hZvNfbqZPTgQtO9yjDAgzsZUa+WMnpMGN20Ma9Eowv1jigrp2Br/SX884fEFGuoqwj4n/xh84k78uYeJlfRGHl9AIEAejobThnaZPuxbwrQahYxch0JueqM4XP7rmAItGkVdlbxyuifyHgZ4WyFL59CPeRvneRMI3wegSka2yf9Z4z9l/RO+ANb8PgACgfDvxiHH//ty/lFiVS0LGUB3J6MZw7pMDRRfmEtLXNid8ENUUyXjOwjTtMSeq/X9p8b6tPsHgnad/xj6MR/ZbzY31Phtag/hW4GgQiYi11GlinxzSCQC0q6uSoYgyMJIc/H4bpeeJEMQdOpuvLebCZH4rQP6/d+1tJ+ZocbFJ0kVNY3IDGN0f/uti3p37NYJAACQhR9EYKQdgGG4kc1jsngUFaK6qsoP/4DjcPn1TI4alaxGJbfa8Q7DMJPFa2TzNNRVOkRStMMHgAZ5S0lEorYGpX32MgQCmNHI4XAFmuoU4dwLAAAoOcAwAwAAAACgRPzgyz4AAAAAADoXwDADAAAAAKBEAMMMAAAAAIASAQwzAAAAAABKBDDMAAAAAAAoEcAwAwAAAACgRADDDAAAAACAEgEMMwAAAAAASgQwzAAAAAAAKBHAMAMAAAAAoEQAwwwAAAAAgBIBDDMAAAAAAEoEMMwAAAAAACgRwDADAAAAAKBEAMMMAAAAAIASAQwzAAAAAABKBDDMAAAAAAAoET+sYX77pai0qqGjRwEAACAIgvh8wc5zH19+zKtlsDt6LACAskOAYbijx6B40vNr/BbdhiDI1IDWs4uRp4uxt6tJTxfjjh0Vny/IL6tPz6vJKKiZMsTZUFe9Pe9eUcNsaOSiW6xNtQgEQnuOASCkqILB5fKFhyQS0dJYs0NH1LbkFNf2mX8Ted3D2Wh4H5vhfWwdLHUw3d7EFbrY6hvoqGHaWRze07c5WYX0zEJ6SUUDi8NjsfnhpyeRSIpfWhy+EXvvVYYqlUxTVbE01rAy0bIy1erlYmxnrq3wewEAYiF39ADahDP3viIvSiobnrzNefI2Z9Jgxw40zBGxhVvPRGUX0TlcAdJibaI1eoB9e45h3bE3we9z0S1ZD+arq6oo8BbZRbV/X40x1lM30lM31qMZ66u72Orpaqoq8BY/DNM3Pk3PpwsPTfTV467Nkv+ykbGFLerv29WUokISHi7bG8blC2Q8t7uj4dJJ3WXsnJ5XI3wdl1Yel1a++0K0o6XOjiV9/TwtkHYWhzdlw1MYhuwttH3cTQN9rAd4WqhRyRAEkYiE3w9FsFFTGQiCGlhcLRpVxgHITmh0fkbBt4/mQ2JT+8k/Bo8d6KDw28lIJb2RyeLK0FEMKmSSqQGtFSfy+AJyC6c+LTrlyrPkwnJGKwYmP6P727nbG3TIrWXhBzTMlfTGO2EZ6BYikbByRs+OGxFkok9Lza1Gt8SmlrezYW4HHkZk3nudKTzU1qBEnJ7coSP6v2PKhqct6p90e44eyjA/eZstnDs2C5vDXzpJ1huloQyzkIwCelJ2ldAwZxXWIv67rMLarMLa689T1ajkIT7W/6wdpEImudnrx6aWo0//lFw22MtK1hHIBovD+5pRIfZHZdVM+a9fSW/st/Cm7P3JJOLupf2C/Ox3nPtw+2V6627qYqv36qTMHxWKIzfjnrzJnuDvMG6Qo7mhhpSe+aV1D8Kz7odnDvS0+HNRbxmvfycsIzqptBUDkx9HSx1gmNuVfZc/YWbWEwY52Jp1pBvK2VrXUFetoqZR2BKbVi71jM4Hjy+4+SIN3UJTVVl1KEJR1/d2M1k+zbPZbv0W3iyvbmy2W6vZMN977ii3trv+j0qcuC+8pbHmgiB34WE6zng3snmxqWXICszL1QRjmB+GZyrcML+JK+LyxExNrEw0F4xxF3dGi6llcFrUf/GeUMwDrX0QCOCbIamF5Yxd56N3nY/u3dV0vL/jqH52OppNXopKeuPDiMz74VmfU8qQlsLy+lUzemrSKO0/4B+JH80wx2dUXA1OQbd0+HIZwdZMG22Yv2ZUtMJNpMzcDcvIL61HtxRXNhRXKiz+DnFpNks9k1vPbNmDr0VwOuIR2dnh8wXvvxbj2/+Y60WlNK3XY74/3NGM7GeHREIM8DQ//X2LCiEhq0rhQ72Pcvmg2TTfpwP/WqWvVtuIV5/y0X7mqISSqISSR5FZt/eMEjZGJ5VuOvkefRaDyb0SnLJ0okf7DvZHo9MYZjaHz2Q3v8Wy4fhbTDTbiD42OprUmnpWq2+tqU6R/2/SUDSehcXhp+RUd3WQ15cSn1HBlc1U0Oux0bBxaeVUlBtTCk7WutI38/h8wZGbsbJc6geGzxeIXReKpZEt8qlxeYKYZFl9et0cDSmyfXBKwtfMyroG7GzJ3FAjSHQ35+0XMRvko/rZIi983U0pKkS0pz0jv6aRzZM+Y6uoYWJm6tJ5HpWLb9TRoGYU0A9d/yz7ddD4eVp4dml9gIuBjpqPu8mt0DQZ+ioMHl+w4/xHfPvyqT3Qh4G+1qYGtBLR+feh65/HD3Iw0W/NrjYAodMY5otPkraeiWrFiUjwlzy3vrV75IDv22DISPBGrlnwMQ7HbsW52um36CJ2ZtpBfiLPsllbgtEL8RYxcd0TGXve2DViYE9LKR0uP03OKa5r3TB+GBpY3NGrHrbu3KpaluznRl+aLmMIN5lE1NNuCr6rqGG2KAmDRCTof59Q0utZsm8/Y3j7pQjfODXQGT3fLa1qQEfDIZga0IQmTV1Vxcfd9E1c06X4AjjsU/6ofnZSbl1e07jvckzrhi2EzmDvv9L6i6irqshjmEf1t2uL4HPp3AhJxe8s+Lqb9ulmhm4hk4izRrhg3mEGk7vl9PszG4a0y0h/TDqNYVYeTt/9mluiACP0+E324zfZLTolwNsKY5iVgaxC+o5zYibXgA6nl4vx/QNBwkOv2ddaFATr5WoiPH3R7pePI1v2dRXyRpxhnjzECX0o1nhPGeJMJDZl9A30tEAbZmQDRbphVn7IJOIEf0fkNZPNxb/JQQPE/ILLp/boYqMn6ZqvYwpuh7YyUgyCoPoGzt5Ln/Dt6+d54xMs54xyO33vK2bj/HFk9qvAfP9ezUQAXN85gssTwBAMw5BAACMb2zAMw8gLCBIIYAiGYAgWHsLfDiFItJvwLOxFYCg0Ov/4f19a/W50CMAwA+SCzxf8uv91I5snbCEQoKeHx9mYaSn2RhRya5y3JCIBHavSUrg8Ad4H+6PSyOZh1sQUFQUs1FgcXnQi1kvf18PMykTkG4KxuAhTRI336P72mClg2Kf8mnpWp07Jo6mRD/8+EHkdEpWLMcxGeuo+bqb4s/p6mPXvYYFvR6iqbZTHMB+9FVdVi937mzncxdvNBN9ZT0t13RzvDcffYtr/OPY2/PQk6QmZNDVFpmtKIk8R66h2BhhmgFxsPvUes7E6OcC5h7NRx41IBM8uRo8OjpWxc3k189D1z3/M9dbW+GbLPyaWjF39qC0HqETgE1cUonnyKakUH1T809iu6EMYhvGr6t5dTW1EkyksTTR7dzWNSigRtnB5gseR2bNHuso/TmUgHJeGPrq/HdpnICSrqFZLQ+KMs0iO5OCY5FJMkB0EQYa6apsW+Eg6ZfYIl6vPkpNzRDJCC8rq/zwdte+3/rKoGH1OKcOEjsqPlgZF4UH77QYwzD8UKmSiuqr4z7ShkccT1Y7Q1hCf0gDDkIzLxKM34y48TsI0utvrP47MknnIMjGyn/jHk2J59j7n4pPk4Pe5+5cPGOJjjexiynNBVQoJHXWMpp7JFYheXNLHwRfADGYrlSVaBD4g2U1qoqeGbMsd/NLN2lQrwFvkifn2S1EJLoBfbHrSpAAntGFGYjUmDnaUtDIjEwlGes1L7NU3cNBeHyF6WqpksrxuA0l/knjCYwowLUES1A7W/4NdoSqEksqG+Tte4BPGdi3pqy15HkAiEXct7TduDXYKezU4xdSAtkqGpJjLT5PlWeKLxcVWDxjmNkdHg2or2TuaW1KHiWpRo5JN9BWjeSn731WHM8bP/tgaf7E/mr89BKP8FXt1ptjHWS2D3WXixWbvdSMkdc/FaHz75lPvxXWXi7zHCylEueKQ+XzB2YeJs0e6SgnivfcqA9GRmP3n8wn+jjuW9BHIZ5hXTPOUlHvtt+iWjMpfn1PKRq18IM8wZCEtt/ruqwxMY1d7acGJz97lvIkr7N3NTBjDxWRxSUQiei5SU896hJul+biZYKKZLj5JxvSxMdUa1tsGf9NR/ew2HH/L4jQtwQvLGUduxq2f6y12kM42evHXm5FU4/MFAcvuYiSAIAjq5mDw9Mi4dsuSyiupwwSvmBrQerWjXiGLw5u/PQQfTBrgbTWqfzMb+b5dTccNdLgfjp3b7b8SY6SnPnO4i6IH+4PTaUzOlEDnKYHOYn8Ul1Y+Yvl9TOPqWb3aKJfu4tZhbI6YyTWGy0+Trz1PRbfs+aWfp3w+XimT1nbmwqPEDSfedfQoZIXHF6z4O/zuq4y3X4rObwlUEbddnZhV+Sm5KY/27qsMJytdDyfD9h2pgqmgM9HmFiOWLkQggFcficQ4VNSoZOlZAywOf/L6p9oaFD0tVR4fZnF4lfTGhJuzqZSmzMA7oRliYrlFfR/FFQx8ktLiCd3EhiJr0ihTA50xhvzEf/ETBzs6WupKGa0U7rzKwFtlEpGwf/mA9sxdfv0Zu1yW5MduC2AYXnMk8ks6VvVMjUre80s/WdzRmxf6hkbn41UE1h6NNNBWG9ZHzDQLIIlOY5ilcPAaNr+QpqYyc3iXNrqds7VMf/8quExTX3dTKYGUnQtB+9Y+kafWBpfHX7b3FRIAHxqd/+v+18fX+uMf+uceJqIP1VXJP43rGpUgRhajE5FVWPvLvlfNdvv3QQJe3GNygBPaoSLgi//EaxkcYURudydDfe0mqwzD8JVn2KUwnivPUjCeCV1N6uQAJ0n9l07qfuVZCnqXgccXrDv25vaeUa2wo5X0xl3iEna3/9ynm2O7TsvCcYZZkh9b4cAwvP9KDEbJGOGftf4WRjKFGpga0M5uGjJ90zPMBhAMQz/vCT2wYsDEwRI/UwCGTm+YEzIrQ6PzMY3ThjoLBTHi0spHrhBZT/dwNnp6eFxbD6yqFusR+pEy7heM6RqTUvYgXMF7yQqHwxUs3PnyxYc8YcvDiCxNdQomJqWqtvHea5GnUqCvtRqVLMka/UhceZYsViFgXpDIFq8sUzFM1G50UqmwGoQk2Bw+XgBk3mg3KdG8lsaakwKcMPqvUV9L1h6N/HuFX4sKpsEwvPJguFglgIuPky49wcZPyMK9/UHo2YmMcHn8t19EZoHmhhqeXdojiJLPF2w48e7yUzFTqA3zvEf0tZX9UgM8Lfb+2n/1kUhMO5vL/3X/6+ik0u0/91GldHqj0w50+vcIL8dDJBIWje0mPPyW0YZCzo1DGakWzTdQpZDkydtRQv5e4ZecXYVslP40tmubOgNa7VEkEgnGuNifq8EpmjTK5gU+wof49eepGI/rnJFu8gd/KT9lVQ07zopZLwb6WmM8Q71cTTAxCnhcbEW+A/jAQDyn7sZX0kXsooa6CmZOgOe3qT3+C03HfDo3QtJ0tVQ3L/Bt9qZCLj5Owk/rEZqdUkiC36rJ3KekMsxGw8TBjlImGWc2DundVUwaFcK14JS/xCUi42FxeEv/ChP7yU4c7PjL5O7I4sfJSldSGCOGGcNdcorrxOYNX3mW8iW94t+NQ6xNsdFCHk6GkvZZWo1FZ66j2rkNc0pOFf4rNaKPjaVJx38kmCjT9lku55XUSQpuxGdQ3H+dife3QxDUKFt1OXVVlXObhw799e7M4S7bFvdp1XjbHDKJsPfX/gY6aoeuiyiGnrwTr02jIJFZbA7//CMRP3Z3J0MfdxP5DXNiVqWkjwMT997I5knqmVdcK88YpGOsT3t6ZOzU9U/RquaGumoHlg/A9Jw02PHG89TMQmnmysmqyZbHpZU/jGjGoZJTXHsQN7FeNaMnvh4zBlsz7UXju528E49pP/FfvJ6m6rLJMhWjTM2t3vpva8QE24LHb0TeKwIBmiU1B0xHgyLlXdJQlylgvpbBnrP1+UdcljkiTXNguR+BQBAI4Gkbn/L4glH97MYPcvTtatrstveGed55JbVi9RYTMiuHLLu7dVHvKUOc0NtJ84Pc5zc3G/u/onMb5kM3xOgzLx7fTVzfdoXB5GQXiTxP28cwf0ouQ0cwSQfvcWopDpY6jw6OdbDQYXPasLSDjFN1SRAIhDWzelXVsjDOur8ufdKiUeYFuV8PSS2tEqno9/OEbshiRU7DLLscbC2Ds/zAa3nuJQlX1Co2PZ/Ow5VbdrTUvbc/aPyaR0LbfHytv6Eu1s1gqKv+8OCYp2+zkRJPJHFPZwdLHeQFDMPNBufDMLz26Bt8aFhqbvXao81/MyUtsHae/1hdz9ow11u6jGVBWf2sLcGtFhlVLHy+ACMC6N/LUnrhiq8ZlVK+m5kyLPeTsquW7AkV6xiwNNa88OdQ5O8uNbcaERu59jz12vNUE331cQMdpgxxdpbsISMSCUfX+NMZz8WqudUzOb8fjjh9/+uhlX7yKJX+2HRiw5xRUPMEJ2np2cWol6sYeZp2JhFX9+ZDYonpsNMynq6hrnLpz2F9PMxk6NvBpOfVBCy906a3iL06s3Vl3oUQCITdS/tW0hufvRMxkxtPvrMx0z52Kw7daGGkMfK7yiMfZ8Y6F+qq5DBUIV5JkpzWplp3940e/tt9OoP91y/9JElK6WmpzhrhOmtE82oe98MzP4srFYUGCZLHt7e66rCQE//FF5YxTm8IkNShpLJh4rrHLVInbVMKyuoxSltRCSXZRbV25hKL1e4UF7AmIwIBfOb+190XosUWuHS11bu+c4RwOR4ZJ6J5UlrFvPY8dfx3DVFJqFHJ13cO33rmA8YXJaS8iil2rfImrnDX+WgCASISCUQCgUQiEAkEAoFAJBKI3xsJRAKRQCASIRKRSCRA3w6/90EO/17h124B7W1BJzbMR27E4eNRfp6gFOXGvmaKr7UuIwwmd9qmpyf/CGhR5MWPCn6RJwVsQMF3SCTi8XX+0zc+Q8tTwDA0a0swZlm8cGxX4Zb2D7/HjOid/XUpGoIgM0OalgYlPqNi1aFw2U831qOtm+OFbmGyuDub007PKKjZdLKt0u1UKaQ5oyTOHsqrmRPXPZaiM+Xfy3LcIAdZbnT5abLsDiop2Jhpr5zuid5tYbJ4i3e/DD46vi3ytTg8/sOILLFWuV938/ObA9HVlPFSqatm9HSXqjyDoEIm7Vra18VWb/0/b/F/wkdWDzQT5xKgMzjxGXI9PBEOLB+ATcvrVHRWw5xTXItPZocgaO+l6P2XRaIeGnE5xyk51QN+uiXLXa7uGI5R9JWRhMzKVpyFhsMV/LTr5d8rBkwNbKu8L4UAQ21uuhQVrKdKIV/4c+jY1Y/QSasY06unpYoWQ/h/MMz1TM6NkKYI5/zSlpUX9HXHhiAdv/0FL+OFpqK6cfqmZ5iyBwrk5B8BmCJIQvJL62ZuDsZsM2FwttaVMbEnMrZQIYYZ0aJ58iYb7VhOzKq6Gpwyd5SbQq6PBvlDGPrrvfJqkR2csQPtj/w+CF1RlM3hY3TWiETCeNlmLQgzh7s4Wuos2PEC7RKYNtQ50BekNUujsxrmWy/SxD6vswqbj5Rhc/kyhlziNX5l5KsiJn0CAXz7ZXqLDLOduXb/7uZif/QqpqCgTGSVMGNYF7HzcQ6Pj35SS6cd8plbuGKW9lNtDeqlrUOH/nKPzhBfuHPZ5O5oYX2BQC5Xdg9no24SSm4/iMhEWyY1KllS5m4FzgOvVBiL6ut9TCw5fDNOcndIrJKGnAR4WwmDqzfN95GkZRH6MW/ZvlfKWZWEokL665f+E9Y9Rjfuu/RprJ9DW2RzmOjTLv45dOzqh8Jd9sXju21Z6Itx/76JK8Qolfr3ssTHHyBwuPwHEVlqVPJoUZkwH3fT58fGL9v7ChFj11BX2TBPouw2AKGzGmZ7C52OHoJECsvr8ZVlDT2YCQAAIABJREFUW0dLq694djH669f+Yn80f3sIxjBv/7mPJElO2Q1zO8BTaDKxlYnWyfWDp218hv+RgY7aXFEXaOtSX4QM9bWWJMkZlVCMNszaGhRJH9znlDJlNszorKpKeuPi3aHNejhGD7AzM9BAV0ogk4hkEgGZCmOmVuaGGmaGIpuRyTnVmMiv2SNdh/a2WXs0ctJgp6WTxGxm8fmCA1c/HxYXK4rnbXzx5lMyudnj0hQw/xbSx8OsdzfTqK9NK9SaevbRW3FbFrYgAUx2ejgbHVju99uB13paqvuXDxC7a4YPXZw8RIz8Ir2efeVZ8rmHiWXVTEtjzeF9bDAzfgsjzQcHgm6Hpu84+2HppO7NRt0DOqthRrJZlJPgd9gMrsOrBiJK+ojjF3n0fHsAwTAEQd9fwjvPfUSv5tunLJo8dHM02La4twIveO05tkJ7iyKwJO0xoxnY0/KPOV74RM/xgxwwM5XO7srm8gQn7zblFLXFYhG93ZhXUteAy7UbP8jhnmh5DDUqeeui3iP72S79K6ywnGGspx52ciIiyvHTzhcYYzBvtBsm/Wn4b/cwypFaNMoQH2trE00vNxN87m9hef2qQxFiy0qKJSGzUv6tqNYxY5gL2jBDEPRfaPrGeWIizAO8rZA92vfxxZgctmlDnYWiszAMEwgESVUDJgU4cXmCAG8rsXU+eHxBiKhUqrYGJdDHGtPtanDKllPvhQvrgrL6R5FZ4wdho8MIBMKUIc5DfW2kiNWLJdAXe0c82YW10hP5Oh2d1TBbmWiZ6KtjslyUBMz6xtJYU5LKN54DV0XSOmUs4NOBOFrqtlqjWCwfEkowhpkrs2GGYZheL95HLQs3QtJ+nuAhZwS4UsHlCbb/+0F6H1UqGZGqqKhpxDzdRve3Q78bOcV1Lz/mYU53Q+lp93QxfnVy0vrjb8O+O5bHD3IY6mtzD1e3CoIgL1eTl8cnbj8btXhcN6FUFv6zVsOVkOHgNpiQbVF8MDmPLzh1N/7gtVixlaOQ0jjONrpiE3k7hOF9bIhEAtrlUElvjEoo6Yfbn1o0rivy+14NTlkjmvc42MtKmFYwb1vI/CA3KZWbpw+TuFP2IaEEs+MzbqADPnfRRJ+GeXuP3foybqCDWHWUlrrlKSrES1uHNdvt8I3YvbIJqnQWOqthhiBoiI81/jGBh8sTYFIRyCSigY5MldVVWh4SWVhe/zFJZM4rtkiOJJiiCw4NdfGlAH9g8H/5TNkETyAIojPYsqxxy6oajojbB61nclYfjri6Y7jwmaKJe/+5ypH5qkDMDTXu7Q+CICg+o2LYr/fQP/JyNflpXFPh5NP3vmL+4nQ1qZh5jKWx5tXtw++Epf924LWdufbuZf0iPmNrDAvR0aQeXDkQ3YLftsArOOKTjyUlxpCIhIx8uiSrrEYlX90x/HpIqvIYZnVVFXtzbUwETPD7XLxhFjLEG1vZ8NLTZMQwP47Meh6V+zwqd82sXiumebY0fegpbgNFrB/bv5eltalWHqouVmpuddinggDcwACy04kN877fsOJEYolNLRu5QqRqnru9fvDR8W00qjP3EjDO1LEDW6BE38gSeYgo/4pZ4VBVsN/Jhsbma3khYMQdxdLI5i3eEyrpYf0qpuBGSJpwGaGtiTXMeFftD4ObnT5NTQW9ffsyOg9tmONxpYf6epiJXRhNHOxEIZPcHQxaWg+Ni1sNq1KxEzV8SCZRgnQlgUA4sGIAk8XF75Xqaale2zm8u5PR9ZBUsed2FI5WuhjDXFIpLd/aWJ/W3ckQ7dt/E1eUXVTLYvOW//0t7W3/lZhPyaX/rPWXXcRbIIAxnj8HC53u4oqtEYmEeaPdMHLr/9yOA4ZZHjqxYRaC7KN09CggJAji2nMRRX5XW70WqdswRQ0zTTZpPSEPwrPwFfQQMCYfgiCP6VdadPH2QQ33IJZRIhRxxmJaKKKaozy+YPHuUOkrpC2n3w/wNEcq6mjTsHaFwWyBYT54/fM/4kSD8cJVpVVMx/HnxfaUMwBNdsgkopercThqgfsmrigpuwpxVjNZ3JAP2K+WlKSXIL/WVEYqrsDmWeFNO96VLeWvX4VMOrU+YN2xN+garBZGGjd3j5QUQLpgjLuk6s4YVh+JUHgdF3yiRE1dM7szE/wdMZvuqw6Fp+RUo2ef4Z8LR654EH56kow1JGJTyzDJVJMCnCQ9ZqcMcd576RP6dh8TS+MzKjzatzzXj8SPYJg3n3pfVtWwbXEfsRnrspBTXKutQdXTksm/LYVzjxIxllW64C0eJlvkeU2TXGNHLDy+gMGU1dfaIhvTbuhoYj8FJm5KIYkq3IoZ/VgXCODfD0VgnLFOVjosDh8tN9HQyN16Ours5kCxW2LSly8YOFyB7KKP8n8c+MA3c0ONSagsrLMPE6Tfxc/TIlzU83zkZuyZDUMgCAqJysN8EAQCNFihqyI+X5BXWodptMEVPBBnmKXNy0kk4v7lA9RVVf59kIA4zK5sHy5FIpdCJsoYdNmKrS7psDn8aNGNMFnqeo33d9x+9gNaMAQ/9SQRCRvn+8he2QldxhthwmCJal86mtQJ/o6YKmHnHyYeWT1IxtsBMHR6wxwRW4hU0g37VLBqhufi8d2EEYkykl1UO3b1Qz4f3vKT7xRxmygyklNc+4+ouKMalTwBF50oBR4f+xyXUYz+R8JIF+ttk32PuQJnmIWWFYbh7Wc/YApFmOirX981ksXmDVz8Hzpb+um7nIjYQj9PCysTTaoKCe07xYutKg94H6+NmRZalutOWLp0wzwpwGnPxWj0l/BxZHbajBpna93bodgMOm83E/nnsmiKKxswclQEAmSJqxHUCnUBAoGwbXFvXS1qSWWD0lYehGF435VP+IBWV9tm6rbpaakO623zGKdPLISiQjy3KTAAF1AtiZp61i1RYdS+HmbStbvnB7lhDPODiMzNC33lzIwSCKDY1DISiUgmEclEAolEJJMIJBKRRCSQSUQSiUAmEckkIk+cilmnRhm/oLJDr2ev+Pub9H8jm7frfPStF+m7lvYd4CkxChFDfmndxHWPERfoir/Db79MP77Ov3UFJ1YfjmSJ1nIYO9AeLW7XLPgt0v/DPWZ85obs27rJ2ViriWTZwjB85GYcOnEWSUW7umME8rhZMrHbsVsiPueNJ96+OjmJokJys9dHyjYg5JbUMZgc5QzKw7sWWiroqK+tNrq/PWa1tOSv0N9n9AzHxXChJdIUQi6ujpa5kQYFVwCtdZUnCATCyuk9ZekZ/D43pxi7cBeLQnSEGhp5ey99UiET338tfhdfjO8wRIZ8oalDnSUZZjUq+cr2YX09JIaP4bkWnIIJwpjUnBSai61+766maJkwDldwLThFUh6/jPD4AkyE0P8Jndgwc3n8xbtfYiaYmYX0Laffv/hnAv7vGU9RBWPCusdo+cD3X4uH/Xrv0rZhLd0dufQk6f1X7B9VS+X0MJs6EARpqCmjAWhT8OWTZddu/JCIdQO62OhxefxNJ99jSkuRiIRzmwOFqT4rpnneCctAfxOyCmv/vZ+wbHJ3D0dDtGFGyvL4uJsqT2SDkAbcalhXq8WiUXNHuWIMc0pO9cKdLzHdjPTUgwa0ZhdZCnhzaGuGreIgEMAtUoJrBbkldbklMhlmhcDjC6Qon0jR8kPj18PC1ICGV0LVolGu7xzR06UFYS5cHh/xQQpRpZBG9mtetH9ekDtGv/Pik6Slkzxa6sIEdG7DvPpIZCRONECLRrnw51BZrDIEQQ8jsgrLsFuGZdXMcasfHV0zaFQ/OwnnYXkdU7DpJLbI3ej+dt1aaN3xnthmg7+u7xwhVowez80XaRjjdG//aBl9eg7tqLOGXzHLKItRUcPEC7KaG2nO3ByM/578vcLPD+VWUVdV2bao96LdoSJ9rn1ePKEbfoqWmFXp426allfD4vC6OxkJ22mqKs+OjJNlqBAEHbgS8yqmSZlSX1v1yvbhMp6Ln7sgJOdgHQYmei32/fR0McZE+Ypl3mg3Gf/KZAe/AHW11ce0cHhtWGC0Q9CiUZysdGMkFOPatbSvLIaNRCLOGO5y4EoMpv3uvtGyFJxA8/hNNma1M7yPrRQXEQzDeSV1CVlVX9LLMT8qrWI+f587WtETuP8HOqthPnAlRmx5uONr/fGzbEksnehhaaSx8lAEJkS2kc37aefLtbN7yeL7iksrX7DjBWYWr0ImbpzfYj3YSlxQcbPBX7L/1YXjBIo9HA3FSnJ2LHjDXFolrSKCkI9J2IAXQ121i4+T8FZ5y0++eMmXUf3tML640f3tSESCBy5F5PGb7AVjumYU0K8/T7mxa6SwnUQi9nA2gmRDV3R3VoXcgnMl8RHnMDCWIPkkBQKBsHtZvxHL70vpo6lOmd3CqMZmYXF4jyKxztiBPbF7UvjIr84OgQD9Mrn73G0h+B+N8bMf2NNSxussHON++u7XeqbILDanuK5FhpnHFxy/jc0jmBjwLVCGyeIWVTDySurzSmrzSurzSuvySuryS+slJR8i8bDAMLeCTmmYb71I+/vaZ3z76lm9ZA9wQBg9wN7FVn/mluA8nPNq3+WYjHz6kdUDpcxYo5NK520LwX8v5we5W+OiSZslMRsrBKgkwV9VtY1F5Qxh+KuOJhUfkqMoVClkLRoFvUpG9BEr6Y0ZBTWutvqSUmPf4/bnfN1N18/z/ppZgQ5SXTHNc4m42qAEAmHtbK9xax4hh309zPYvH0AgEBwsddSoZEwqSFxa+b1XGeGfCz8klPh2xZZXamuKKxiV9EahI91YTx2ZzXzAxeK2Llqih7PRwrHuZx+Ir6QLQdCqGZ6KDfuCIOhheBbGqKhRyT640lWt22BWcob4WDtZ6WAE9icOdjy40k/GKzSyeVye4OcJ3faLLpqXH3htbkiTPWPz8I3Y5JxqTOOeC9Hrjr6pqmVJMcCS+JhYmphV2dJVu2JpNqxdCel8hjkitnC1qAQdQqCv9arprQk0cLDUeXAgaPIfT/Alp+6HZxKJhGNrBondTTx1N37nuY94qSkdDeqKloc8FJbXX3magmlUkuCvK89S0Ip3E/wd/1nr33a3M9ZTRxvmksqGihrm+6/FP+8JgyDI1IDmaqs3a4TrUJSkWnUdCxNxjaTSqlHJl7YOE5Z6nDfabe3sXpLu69vVtH8P8zdxRc7Wuue3BCKuWjKJ6G6vj6nuJyzLs/fSp3v7R7fzZvPuC9HobWDEtcNkcfGu4FbMDhE2L/B99alAUnnE1zEFg3paOts0Ey0sO1weHz/VnhrojNdVbnXBN9mZMazL8qky/f1u/TdKIfVFiETC0ondVxz8pgeirUFZOrH7r1O6N/u9qqQ3hkXnP4/KjYgt3LzQ96exXc/c/4qOyWhk82ZuDn54cIwsurmfkksPilvwyJmJcO5h4qFVA2XoCEEQFOhjnXR7jjy3Q0DLnOXgggqVn05mmGOSSxfuxPqNkRCJf9b447/HAgEsafMGjYk+7d7+oCnrn+Bni3dfZZjo0zYtEPFLV9Ib1//zBi8nhLB6Vs+WSsJmFdKX7X2Ff+goias5SjSurUWh5q3AwkgTM0m6GpwiDDotqWwoqWzw8xRx8Z34Lx6zH6FGJfv3skRSmW/sGjF65QPfrqY7l/SV/rBbM6tXel7NtZ0jtFDSIiP72WEMs3Dd9iGx5E1ckexZAPIjEMAYl7UWjQJBUGxqOWaOqEImYvZoZazJAcPwX5c+SSlaHBlX5L/0zpQhTrNHuno4Gso/LzlyMw5T+oxEJCyZKMax0Q6ubC0axdJEJocQDafj3WrGDXI4fCNWV0t1/CCHaUO7NJtI/V9o+oGrnz8ll6JXg5o0ypIJHpjqLDX17Gkbnj0+NFaKCDwMw68/FyzZE9YWa8v7rzO3Le6thdPqEQuVQsKL8spDVW3jxcfJMnRULjqTYY5KKJ65ORifE6KuSj6/ZajQWlx/nvoxqaSRzatv4CTnVONDncVioKN2d1/QtI1P8WEvJ+/GTwl0Ek45H0Zkrj4SKSkfdERf2/lB7lJutGDHCzUquYuNrhqVrEZVodezPiWXhUbn42cbelqqLZW3bRFf0isk1ZNHE5NcitmmtTeXdRe/dXRzNMCU7N13GRvVYm/ZNIbyaua5hwmYDoG+1sJpjYk+LfjoeB1NarPvp5erybMj4zBKNZMCnHad/ygpyO7U3a+tMMwYMRBGIzezgO5g2XyQ3X9h6YXlIhGLiIIVPiLd3d4A/YzLK6krk+FvIae4dvOp98IqFJIQCOAbIWk3QtJcbPWmD+0yYbCjLk4ZRkbuhKX/fRW7UBs/yEHsdolSubJpisuao6iQ3p+fKmmKIxDAdaK5Cf+FYQVAEBaMcb/4JAkTvVVUwRi/5tHtv0ZJ2oGqa+DM3/aijbwRbC7/cWT2DEUn10kHhuFKeuOHxNLtZ6MwWySdgk5jmD8klMzYFCx2k+PI6kHoorBGumpi48KESIom1dGk3t4zauaW4GhUGBGZRDzxx2C0I6ivh7mxnjqDKWY94Wyte3S1eL+3EB93kz9PR0npIESKcr1CmLD2sbmhhhqVTCRJHDAsgPErJ1nshzzg460waKirCKcUHC5/9RFsBjki14w+lF3oAK8fp6elOqqf3f1wMSWSZBmtLDCY3P4/3bI21aKQiQTJswc+X4CPPEc+jshYbJ4xEk0WnVTKaOQUljFO3omXXimZweQcvhH3v/bOO6ypqw3g597skLBX2MhSBAVZIsp2gCBurYp1fnV0aNU66qjb1j1at3Xhrgt3tc5iXai4FSeKA5S9Qki+P064udwMgquhz/t7+COc3Nzce3LPec9556o9GXr6+WPuPH43aUXa9LX/hPs7BHnbtvK3r5MXW9r17JELTjMarc2Fk6qLEBeWVIgEXJIkZFXyG5m5q/cwV2AIoQppnW2f74FCoXiQle9oI+ZzWQoFuv4g569LtSxf6oS2eePV25Ie4w/oWeJdJOTOGxHRZ9JhRvuTl4VJo/btmJ2gcfCaiHhJkW66p019cLAWeTmbPcjKp6fSQwjtOH7/cwrmfaczv5t36jNYPT4d9UYwN/Gw7JfYeNXuDIY6bng3P0ZcU0SAg6mIxyhYRkeHXBEbcbfMiO/yQ+r1Bzk4Y86aiW1a13QoszQVbJ+dkPT9vhc5NTYuJiLu+ilta9VBdYp0n7r6n1qLyeNkOrUe84EwbkEfxEJukPenLYZdaxB5fAtXKtBr27F76kXG/DytYoL0dWfVh5G9m+0/81BdFczlkDoK59UVdQ/EWvF0NnOwFt97msdQtiOEghvbYCvJ9wuZko9BaXnl3lMPf954SU/1kjrSSvnxi89OXXnerGEdpPL9Z3n9px1l6IpIklgxPsbKTOlPXlAkbdYnRSaTV2mPYH4Pp6T3gCCIwTP/xDVJGcUZ6Xz0Gt5WpgJ9IgZ51fuNmCCnHq29tv/JzNT2Mrek27jUM6t6aDRF9U9sXFfB7GAt8nQy83I283I293Q283Qyw7Pf8YvPkifXWBlcvPXqSXaBi97xMh9IXAvXiUZpFTpL2lAPmGHykXO9fjqEfM7kQc2P/9Y1yFvlYRjubz++XxDjSA6bFa8zHD4qUNeUbSTgpMyIc3MwEfDYm6bGtdbk5m1vJdo+u72FiUp3R5LEivGx+jx5VmbCCO3lUSkGdPBRd0n9EHgfKQ1hn7jaDWAfiJ2VSGPldoqOke7U697tGqpnuhjfL/jjOmR5OJr9j1ZniWJQR9/3c1D/WIa0/3X0xamaGO1cDhkT5ISde021l3iSyxVjFp/x7blx1KLT2qSyvZVo0ahIjZWFGEz9KlR/NU9aRnbnMfvVRc74fkGhvioLi6OtODbYqaKySptUZpGEdwNmuPMnon+icq2sY2GdXffFrm5YLLJLtK7EW/5e1punx33RVhUBOPWrUFu1SDkvZ7NN0+K0OYj4eVrr+IlJknBzMGkX6vJ1d7/Fo6MOLe70YHf/Sxt7p8yInzw4tEcbL38va2paiAly9HWv4Ybtamdc8RltEFwOKzle1wbd3Jjf7IOjEz8p9UYwYxq6mO+bnzTvu3BTEc/BRrRiQixLU9LBjtor24T42LYPqyWLjYWJYNus9ttmtddhO3RzMN06sz0OZ2KzyAUjI/SPONSRDh4zqKPPjKEt9DybnoR+jKgeKzPBoI4a5NNHJ8Jf6/xuYcJvRXuXxSKXjomKonV+qK+klfaPvzfj+gXTF4W4N77t4f9+Z6PLnvfG09msS4xHWYVMPZF1VKAjTgrBYbPatdBcA8rGXGgi4oY2kegoE5IU4XZiedcerb0OLuo097twK7VM5hTNfST6p7rbduxut3EHGIXSEUKxwU7DuvoxGrtG6xov4f4O723eritJEW61uil8CtfIblpmjMBGNltnxh9c1DEmyIm+EjUR8ebXDLUa3s3v6NIuusOWqJ9PyGf7eVp1jfEY3y947aQ2Z1Z3f7xv4Lk1PX+f0vbHASHdYz39vax1pBwhCKJTlHv1azS0S5MTy7vRrY2fgeR4bx2/1MSBIZ/ag/UDqWeCGf/qveManVvbY+uM9toGZIsmdhptiq1DnDdObafPXsrBWhzcuBaFra+75cap7azNhVtnxtep+kVcCxehJn9OFklENHPYvyBp+pBanIffA38v62idqoJaaWBvcmBhx/cu4VUnRvUJ1BbDPa5fMCMFNJfDWjOpdWAjGzwRTBwY8inil7gc1pqJbSjXVgGPnTI9vq71hikSwxt4On2QqT7Ex3b//CQ+l83jsOaNiGBMfImtVGvTxHANOexMRNzl42M4bFbnKA+N0X1GAs6S0VHLx8XgeyRJok9cowvre80Y2kJ9N8bnshZ8H6G/r2Irfwf1/ZmDtWjJmCj1k4Q3c+CwNc9UJiLuzOFhen7ph2Mm5ofonBbCmtp5fAIPDC8X8yY196DNfSQ75yTsX5AUGeCo8WmPDnSa0D8Yh8ztm580cWBIrUqaDhFu22e1T9/cJ3PPgMNLOi8dE/1tT//4MFcPR7O6ZnnD5kVPJ9MDCztOHhyqHvb2qZFYGsVrWY8mxzf6kGJFn4d6Y2NmYGEi0FH0m8UiR/cJOHL+SX5RhYmIZyrm2VmJesR6fsTIS0yor93F9b3qqpYU8jmnVna/kZn7+m1JUWllWYXM2kzgYCMO9Lb5pGv/1RNbr9138+KtV3U1grFZRHMfSY82Xp9ta+IsMV43qc1Pq84zAtgGJvlorJ0g5HM2TYvrNGZ/bLBTnQpg1wlrc+Ffy7st2pr++l3Jl+0bM/R1dYLPZe/6OXH13hvqEXq1IuSxw5s5dI3xwIZ2kiQSWjZoF+qyas+NeZsul1XIBDx2G5oJpjnNJkIQyNvVIrFVgwEdfKhNw6g+AWevvbhCCywM8rZZOiZaPQxawGMPTPLtE+e97djdpduvUT4K333RTP+Me1g9vmduh8kr0jZUp4m1tRDumJOg8QHjcliNG1ioh0u0ae48e3jLz7NSpH8pIyM0RYdwt1++bfWJgtq7xXpmZObiXceo3gEtmtaucfm6u5+FiSApwk1P25OAx/5YgX+ONuL5IyK6RHt83NinOtG/gw8jotVMzJv7XXh7vXMt/4sQ6jVcAcBwuP8sLzun+F1hOYEId0dT3bIwJ6/U2Ij3L84F/zpZr4qG/XyiiYfVzGE19pELUq6YiLjujmbNvKw1KvGevSqMGbaruLTS1kI4cWDzzlHutQoYaWXV0fNPUo7cvX4/5+KGXtp0g6lnHg6Zc4Le0j3Wk8o4sfnwnXFLz1qaCnbP7dBAexje9j/vrU+9pVAgkZDTxN2yiYdVEw8rVzvjD5eCqWcfXb1XI8lzC1+JjgSCj14UhA3cRv1raSpo3MDCu4FFtxiPRmqZvdUpLa/cdqyG3YHLYelTpys3v+zbuSe/7en/+TPN1VMUCkXUkJ33nuYJeOy2oc4dI9wjAxzry+QAghkA/lOUS2VFJdL3cDo9eTnr8u1Xw7v71TWtzQfWwTx1JcvBWvypY/A+In9dfsZls/hclpOtsW4vReDfJTMrnyCQs8S4rvVP/3VAMAMAAACAAVHP1hEAAAAA8N8GBDMAAAAAGBAgmAEAAADAgADBDAAAAAAGBAhmAAAAADAgQDADAAAAgAFRXzN/6YNUKrv7LK+wuMJYxGvoZMb9SFUccAHgFznFJWVSIwHXRWJsZvyZ8mHpSblU9uxVUW5eGYskTI15Ho6mJGm4KzCZTH77yduCogpjI56vu8W/fqmPXuS/yi1lkYSvh2VdI3r/k3y6cfTZyM0vffSiUCaTN3AwsbUw0nHky5xiXLLQyVYs+bw5xQCAon6MsYVbrvyy8TK9hUCIIAmxkNMh3G3GkBaMyeJ0+vPZv1+4kflWXh2lTRCooYv5qN4B9HxsjbtveFdYjs+24PuInm2U9fumrTm/fFcGfj0oyWf6UGUSJblcPmXl+W3H7hWXVdK/zkTEG50cMChJWd1hw4Fb45ad03Yv7Vu6rpnYBr9u1G19fpGyPCWfy3q4dwBdLC3bcW3mugv4tb2V6OKGL6h3XTuswRWIBTz2o30DqY9cuft61MLT95/m0YPTSZIIaGi94ad2OhYQLolrdJQv9XIyO7Wq+9OXhc37b8UtjO+l0H3vCKFZw8P6J/rg12nXs2es++f6g1yqVg9JIBc7k+XjY5q4WyGEOo3e98/NVzrOhhDqHddo3nfhXl1+V69TRBCIzSKdbMXTvmoRHeSEG50SVlP1hu/u+tJEpOyTN+9Kxy07e+rKc3oNQQsT/tgvg5LjvTV+ddjAbVSx6ssbe9lbi+k/DULo5PKuDV0tEEKenX/H1dq5HPJp6uC4b3dTCSYHd/SdNqQFQoi6BQKhlRNiE6tLZo1bepbKW/ldT/9x/YLLpTLXDmvVb5bHYQU0sln4fYSjDTOVJsWYxWc2q5WiIhAS8NmhvpIV42PpqUJqHUdLtqXPXn8Jv9UgJAMzAAAXL0lEQVQtxmPJmGiE0Bc/Hjx1RVkcmnrav5p1fP+Zh7hx1vCwB8/yf0+9pe0iEUIHFnUMaGjTbVzquWvZ6ldLkISFCb9/YuORvQJ0nEQul89ef2n7n/dy8lQVAAU8dlyYy9LRUfSxVi6VTVyedvDcI2o84kTcbZu7zBwW9iHpU169LfHvvRm/5nFZT/YPor+r8adkwGYRWQf/t3zX9Wlr/qG3434QCTgJrRrMHBbGr4cLJkAbhruRoiNVkxkKhORyRUGxdNOhOwF9U0rLVZLyt53Xek44eP1BrpyWO0WhQHcevxs048+pq8+rTiuros72w5KzeYXKWjeVtApl1CQrk8mjh+5as+8mQyojhAqKKyYtT1u245q2q6VTUX3Cvy49o88C5dKqlCN36UdWylTneZFT/OPyv6l/qRJ49Fp4f/x1P3Hk3ns1pTIuUXfp9uuWg7bLZForr2mrqae85soqhBC9P7Udr/ve6X2bcvhOl7GpV+/l0CvoyRXo0YuCdt/svnL3Nb3zdSCVyhBClZpuTaFAlTL5w+cFfSYfvv3orY4rf5xdENJ/y+G0J4zKvm8Lyn9YcpZaHjGgV6E4ev4pQujctef0a16XegtnYcRSGdeboz8DeGpW3gjtafxm3sni6o/QF0w6Fk8KBSqXVv19Pbt5/22Xb2tdzWj8gRQIlZbLTlzKajloO9WoexxNW3MeIdSuhapQ29XqpQa9MnTadaVYzXigynTdPqxBrUXsq6oUjI6iX61crsjJK/tl4+V5my5pO4NcLo8d9seyHdfoUhkXb979V2bkVzuplsISaVDflJTDd+jjESFUUCzdcfx+YN+UtwW6Kvvqj44BqANc4Jk+G2BwPxSWSLccudusz2bqgQH+A9QPwayb3PzyvlOO4NcXb72avrbGNMqtWZdmxR8ZR88/UT9JpUzec8JBHd/y5U9H7j3No/4VC7kSSyN6IZzZ6y9KpRrK5wl4bPofpUlbsOUK48hVe27ouIANqbczMpl5/CkeZxd8M/ckNYUSBJJYGhnT0he/Kywfu+ysjvPTL1jIr/Fnb/2eOj3GeYR8toUpHysMxyw5Qz+SRytfo1CgPpMOy+XvWcDVykzgaCOyoeVKVCjQOJ33njRqX3mFauLjsEl6jaNfd1y7+/it+qdig1UZldNuZCOENh+usbTCG8cTF59RLXrWvaiQVvWedFiPAzUglyt6/nhIn97jsEnGQ/L6XenJy1n6jKPluzKOXXjq6WTGZik76sWbYoRQ1uvCEtrKNa+oAq93X+aW4BYel8VIY0kQGp4TIY+Z01jAYzvaiCWWRjV+ml3Xtd3dt/NP3XmiKhBCEjVu4UFW/qx1F/HrjqP25earClCySIJF+4qCYmniyL3avsVAyCus6DXx0L99FcBHo/5pP1ztjNPWffHiTdHIhafPXn2BG9MyssulMj6X/ctG1QraTMw7uLiTq53J05eFid/vpRbOC7dcaRuqoSJYRmbuun03ByT5qL+Vm1/61+Us6t8f+gZiHdrLnOLm/bdKZXKRkGNvJXr2usjdsUb1PSszQcbWvuonlEplV+8ppSyLJPCiODMrP6+wXJvCWYFQrx8PZWxN1miF/X7BKUoqmxvz09b1wEraIbOP7zv9kMMmLU34RvpZTE+v6qZDF6o/2u4dITR/Szp1tTwOa9fPCYHetm/elUYN2YmNC/lFFX9dzpoxLCzzWT4+bMGWK9j4hxAKbmzbq63S7uDfkFnw/Lex0S39HBBCIxecogoGvH5Xqu06MzJz6JuqyYOaD+3aVC6X95p4+HT6c9zzi7ZdXTE+lvHBxHC30YuVywu8I0/LqKF3ff6mSCaTn0p/TrXEVGvUa+XirVfbj93r0aaW+nQEgbIPf1UulS3emr5o61XcWFJWufXovd61lUZo5GJ+dFkXhFD0kJ2UDEs9+zAq0FHbOEoYuTc3v3ocpVxpE+IssRRlvS7CO9FyqWzdfqaCev2BWwOTfKktspONmHGAt6vF8d+61tohscFOq35sjbs6Ztgu3KhxS405RKssFNpEsmVGPJ/L3nTo9g9LlEu0rcfuTBgQ/OZdKV1+j/jCf0xyIEJo7qbLVH8+zi7Mel34UQYFAy6bXFRdz6NKLh+1SPk4EQhRdT7USy46WIsubez9Mqd49OIz1Lx06fbrwhKpsWGXGQb0pP4JZoy9tXjH7ATKMqpQoANnH3WN8bx4S6XEW/ZDNC5F5ywx3vBTu/jv9uD2G5lvZTI5W1OF1ymr0hJaaSgKtu3Yfeq1uTGfsmxJrESXNva2NOXX1WXptz8yKBXusK5+S3cop4C5my7PGt5S26feFpSPXHB68ego9bdwSTjMjKFhlOl0yajImcPCdJTIVOfw30/MTWosDlqHOFEn1J/yiqpdJ+7TW0zFPLzLPPy3atIc0atZoLctLqq4ZlLrNXtvtAlxad/SFRv2AqprOG44eIsSzK52xrVKLIQQFhgYHRPWoi3p1GsfN4uhXZsihEiS3Dwtrt/UIyE+ks5R7th+zMDYiGsk4OAN4svcktLySobWVKFA+85k0rW4HcLd1M+jjTFLzrRprrXMER0+lz32y+DT6c+p1d7e05m1CmYKI1rpa/wk08fRr2NjqHG0/qe2CSOU28eMB7kymdzfy5rq59NXnh+/8JRx8kN/P3ayVfVeoDezKGd+UQXjObG3FoX6ai1rePOR6lHXVpzg3DWVrwCHTe6YlYDHe3K89/2neQRBJEW6+XtaIYTmbVY5rzjaiMd+GYxfj/0yeO+ph09eFuJ/5226onHcfSAkSVJPskymEsyIQLU+4RIrUcqM+AZJa6k73Xsqs297zf4QQP2ivgpmjION6OFzpfdN+t037UJdKFsjQaDIAFVtUX8va2pjKlcocvJKNbpcyqoU3ccdaOVvz2hPy3hBvW7spizuNmvdRYZuuWuMR9cYT3pLTl6ZpN1K6l+83UcIbT6kdMDhcshx/QJ/23UNX9veU5k6BDNCaMfx++oTrlwuLy1XadETWzXABRMnr0ijHyYScii/Mx1MWXWe0bJtVvuIuhdqLSqVfjP3JL3FSMDJ3DMAIVRYojLmxYep7JShvnY6ZmQ9SZ58hCSJcmkV3Xo99ssgbcc/qn6EEEJ+nqr9N5tNbp4er/u73OxN8JKoXFq1vtqbiSCQpakAC+mdxx9Q6wkBj10nB35sXvFuUHsxQUyIj4QSzNSX6iDzeX6H7/fm5JVR4gch1C3ao7hUSh9HEc1UwyGgoQ1jHLULdaG8uk5eznqcrTyVh6Ppg6x8hNC9p3ln0lXDJ0GtGu6LnGLGc4J3hIzDDv392L3TusrKKinNUkt/eOjQfQatzAT0VTjly4m5+VAl5gMb1Vg0BHnbUD1z/1keMkicbMWUie3a/TcgmP8b1G/BTHdExNXuqH9JgmDsYsnqCQUhVFgqpRc1JRByczTNxPPIszypmp9FGU3sCXnKL9196gG2q1GYiHgMwcwA62+zXhdSFeZ93S1JkmzoYn7r0Vtsk7t6742/F1M927iBxa1q96W+Uw4zSoLRpTJBIDwNPXqef5qmRMV9ouPaPid0A6i5Me/jnpzhMsYiiVF9Auj2YAb0n1tsVLf4qOa+EkpXsfwPpb3TwVoc0NB67+mHCKH0u6+LSpU2Vxc7vXShJEnYWyn1wxmZuUV6O/XQtQIaveEYlJbL6I5aeMsY4it5maN6qllkLeMoLkxlFTr49yPqrRXjY7HCuVImp9StBELh/nVe4WGq5IqSmn6Xrfztl42J1nJrqiN5aqpgOvSnxURcQ61CVyTU6q32byHg0ebACgO9SKCu1G/BTB8tIgHXRKya4qvkCrq+Wi6X091xLU2Zqt2dcxICk1PwtEKt+ilMRKozvyssR3rDIgl3B5XvbmBjW7zVploimzlkZuW19LOn5O7PGy5tm9WecR4PR1NHG9GR80+xNwrjXSFf9TsqFB9aHzc+zIVhjXZ30FrBXgc8LqtDTbsA5UTGYhFymXIGz84tsTRVegMVl0pX7M4Y3NHnPTTnFFZmgtz8Mmrt0iHcTXdQjYDWe3mFNfxyf9t5LTbE2dPJTNPnEEKoY6Q75bJHORBFBjh0inLHgpmSygihEB9bPW9h55yEFgO2YXdo9adRG/T1mW5ppA6Pwwrxsf19SluEEH0cyapqGUd8LtvYiIsDvageMBPzvBtYiISc4tJKhBBlljYz5qubkExEvDYhNUzvlFKKjpDPlssVlBx1dzBZPi5Go0EKIWQmVj0/9G5BCO0/85DPY8cGOeIFh5FA9ajTXcBwBB31WiQw0Ih2+hxoZKgXCdSVeiyY5XJ5Fk1f5+5oKuRzBDy2yuJyOpPav/51OYuaqTlsUt3mamthNGVw88krmVpcTESAw9F/lMaz24+VriIrJ8S+eVtaLq0a9vMJbRdpbsI/tao7o/EYzQ43PyV9fko6/d20jGy5XK5utF79Yxvv7hs07p9IkhQLudRbW4/eHdypSWgTybpJbRBC09b8Q9dV1spP/wv9KH4uxkbcJVo2NBJLI0rXuv/0Qxy1jBBas+/m/M1X5m++Ym0mnPpVaMdI9/f43t/GRrNYZOcxqfjfPacyBXz2/BER2o4Pbmx7+5HyN718R7WDfPOudPraC9PXXjAScLrHemo0Mfh7WZMkQdeZI4QGJDZu6GrBYZOMbav+BmZnifHo5ABG7H6t/H1dpTG2sRDqPBYhhLyczTb81A7/UnQde13HkYeT6ZU7b+hnDvK2QQj5eVoxopAbupqrX4aDtUjbc0InJshp0ahI354bsaDNfF7Q5us/rmzqo/HgDuFus35XLn9z8svoa4sJv557W1DOZhGNG1gcWtwp1MfucrXa4GLNoPn0u6qbCmjENI0bAnK5/Alt3ebhaKrzcKDeUP8Ec3mFLO169tuCsmU7rlGrRZJAPVt7IoT8vKzOZ7zEjaMXn2GzyI6R7scuPB02RyU7vZw1b4AGd2qy4/j9mw81BMZ0i/Gc+Fsa3sGUlFX2nXJ4xfjYgIY2BcXlPy5P03QyrRy78JSxhGdQKZNrdKlls8n1U9p2GZuq8VNhTSV4P40Qmrnuoo+7ZaivXVyY67ELT9/kaXVI1sith28ZWwcBl4UTZVDIquTjltYIQCJINHt4K8aNXL1XY77GItnWwqhNiPOafTdxy6o9N5p4WHUId0s983B+tSfOm7xSelRMXQn1tQv0tqEm3K1H7o74wl/baiM5znt9qjKDR2ZW/k+rzk/oF/ToRQEVf1JSVvnkZYHGzyKEbMyFVCwQThSD+8rd0fTOY5W7L0GgkMb67pgRQiN7Bew+mYnNK7o5fyO7pKzywNlHlIEZIZQcX7vnF4/DcpZo7hM/T6vzN/QdRy2b2jMEM87V0zXakyGYI9S8N7DaWf050ZhQT8jn/Ng/hAroz84pWbr96jc9/NXP6SwxFgk4OOWAXK5oP2LP+ilthQL2yAWn3xaUY03AoxcFJEn2jmtIuV6+yStNnnx40ahINosYs/jsq7eqgfNF24Y4UYxCoUAI2VoanV3d48Wbotjhf+ADGrmY757bQWNnUsgVCsaoQQjN+aaVlsO1UlFZdf5G9ruC8l93XqPWTwSB+sQ3ys0vDe2/Dbe4O5oeXtK5ricHDIH6J5hfvi1VF04dwt1w8q9fx0QHfrkF72AqpFVD55wYOqfGdpZAaPEord6VO2YnNO21Sd0+JxJyv2jXMKU6ZdKfF565d1zH4ZDSyhpH6mPDpfsAGxtxKS10SZmM2vKu3J2h0aW2RVO7TpHue05lqr+1YGTk8YsbZTgtQ2VV5zGpHDYplyuq6Js5/SRd/2nHGC08DutJao2MRQoFotJRUTAEc35RBeUJT9EmxGnD1LhJA0O2HL2LFyiVMvlXs45/Nes4/TBLU0FCS81+PXqyYlxMUN8t+OYVCH0z9+TeeUkaj/RuYBHiY3uhere0cnfGyt0Z9AMIAs0cptUjz9fNgi6YG1WvYOLDXOmC2dJUUFfXfbp5RRsKBaJ0AxRWZoIu0bp8HWpl6Zio4H5b9RxHnaLcF2+7Sr1FkkTbUGeEUJdoj5ELT9H9IbpEe6h/1+PsQvXnZHi3phMHNlc/eECSz8Kt6aqQrS3pw7s11dixkwc3pyKjMjJzmyWnMA74ursfFuExQY4nLimt4McvPvPpsZFxZKivBJszqBGanVOMI8SonCRUDjgdaBw17yGYc/LK1H/0dqEuQj6noKiCyoBEj0oA6hf/hQQjoU0kv45VqsIkVqLN0+K0bbYIAv06NkaHm6uZMX/O15qn4HnfhdO9tRUIMaRyiI/tz9/ocqjGHmrX76s2B3+v7XE1JRn//flrF6r9QVZ+nhZL9rIfoszEGrylzIz5u+Yk0hMjVMrk9Dmdz2MtGR2p+/I+G1wuO3VBR212UA6b/OOXxA9Mmm1vLcbiAXPh5isdjrXbZrV31e6ZNW1ICxwvpJHYkBpuZUkRSrN6v4Qa/rGN9XauprC1MJo8SINw0o2pmHdsWRc9DtSFvbVY/3Hk5WxOpRlBCDnbivFvx2aTdrTYBy6b1Bh1Vld+oUmysgrZnPWaFf7J8d79ErW6KIf6Sr7t2Qy/3ji1nZ+nlbYjvZzNdsxO+LBL/uQENLJeM7H1v30VwEejfuyYbS2MmM4XBOJxWB6Opv07+DBMd1GBjpc39Bq1+HT63ZzCkgq8YBcJOL7ulvNHRtBnWHtLEfaOpofw92rX6OC5x1Qcp52VKuX9jtkJ24/dW7wt/UVOMZbKBEIiIcffy3pC/5Cm1WPb0lRIXa1DzZnoSNoTqi6Ck0RMOT3hlbu7gwmlPdt/5qG1Ge081WkZSJJMmRHfY/xBrFKj++mE+ErSN/cZtej05TuvC4qVN84iCQdrUc+2Db/u5qfNUwYhZG0moLspMbAw4SOE+ByWDhcYgiAY964R6ka8G1hc3tRrzOIzZ66+KKuQ4avlcVgtmkqWjI6i94yyu2yNH1QnG7FTC3WztRBSMcRiobJPFo+ODu2/lUpCuXJ3xvwREZamAsrHniCUHcLnss+t6THr94s7jt+nHMdYJOHuaPrz161CfCVIO0kR7tPX/IM/QpJE73ZKVYelqdDLyYxyv0+KUD2lTrZiajdD3YvEwgjfAt2F53+dmxy98DSjOtulpDptnHons9mknZVRXAvXb7v76agzYW8toj7rpEWPjaGNozeFJVLlOBJyfN0t54+IYKxUAhrZ3Kq2AdEDEzpHevyeqrRZNKEJP3srke7nBCduc7QVU1oHBxtlR8WFuQZ629ytbj/6z5MJA4I1nmT28FYtfO3mbb7y8Hk+XqQSBLIyFQ7p0gRHq2NIkjy8pPOafTdW77nxMrcEK8xYJGFraTQgsfGwbn7UkWIhl1JlY/dGkYBTUVlVKZNrM7xw2KT+jmPUkXy1xGfW5moji0A8Dsvd0TQ5vhGlIOFwVF/nqJbLBagvEAqFLkUZAAAAoIOkUfsu3noV4mOrzVYCAHXlv6DKBgAA+PzIZPLE7/di7Rq2WAPAR6F+qLIBAAAMDTabfPyigCDQmORAHRlsAKCugCobAADgPcnIzLG3EtUpFz0A1AoIZgAAAAAwIMDGDAAAAAAGBAhmAAAAADAgQDADAAAAgAEBghkAAAAADAgQzAAAAABgQIBgBgAAAAADAgQzAAAAABgQIJgBAAAAwIAAwQwAAAAABgQIZgAAAAAwIEAwAwAAAIABAYIZAAAAAAwIEMwAAAAAYECAYAYAAAAAAwIEMwAAAAAYECCYAQAAAMCAAMEMAAAAAAYECGYAAAAAMCBAMAMAAACAAQGCGQAAAAAMCBDMAAAAAGBAgGAGAAAAAAMCBDMAAAAAGBAgmAEAAADAgADBDAAAAAAGBAhmAAAAADAgQDADAAAAgAEBghkAAAAADAgQzAAAAABgQIBgBgAAAAADAgQzAAAAABgQ/wfR3wEToSWabwAAAABJRU5ErkJggg==" alt="东方电气风电">
+
+  </div>
+
+</div>
+
+
+
+<div class="container">
+
+  <!-- 左侧控制面板 -->
+
+  <div class="sidebar">
+
+    <div class="project-name" id="projectNameBox" style="display:none;">
+
+      <div class="label">项目名称</div>
+
+      <div class="value" id="projectNameValue">--</div>
+
+    </div>
+
+
+
+    <div class="section" style="border-left:3px solid #1565c0;">
+
+      <div class="section-title">FAST 文件入口 <span style="font-size:11px;color:#888;font-weight:normal;">(OpenFAST/AeroDyn .out)</span></div>
+
+      <div class="file-input">
+
+        <input type="text" id="fastFilepath" placeholder="选择 OpenFAST .out 文件...">
+
+        <button class="btn btn-secondary" onclick="browseFastFile()">浏览</button>
+
+      </div>
+
+      <div class="preview-box" id="fastPreview" style="margin-top:8px;">请选择 OpenFAST 输出文件(.out)</div>
+
+      <button class="btn btn-primary" id="fastRunBtn" onclick="runFastAnalysis()" style="margin-top:8px; width:100%;">FAST 分析</button>
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="section-title">1. 数据文件</div>
+
+      <div class="file-input">
+
+        <input type="text" id="filepath" placeholder="选择或输入文件路径...">
+
+        <button class="btn btn-secondary" onclick="browseFile()">浏览</button>
+
+      </div>
+
+      <div class="preview-box" id="filePreview" style="margin-top:8px;">请选择QBlade仿真输出文件(.txt)</div>
+
+    </div>
+
+
+
+    <div class="section">
+
+      <div class="section-title">2. 分析模式</div>
+
+      <div class="radio-group">
+
+        <label><input type="radio" name="mode" value="extreme"> 极限载荷分析 (EOG/NTM通用)</label>
+
+        <label><input type="radio" name="mode" value="fatigue"> 疲劳载荷分析</label>
+
+        <label><input type="radio" name="mode" value="both" checked> 两者都做 (推荐)</label>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="section">
+
+      <div class="section-title">3. 高级参数</div>
+
+      <div class="checkbox-group">
+
+        <input type="checkbox" id="includePanel">
+
+        <label for="includePanel" style="margin:0;">加载面板级分布载荷 (内存大)</label>
+
+      </div>
+
+      <div class="checkbox-group">
+
+        <input type="checkbox" id="filterEnabled" checked>
+
+        <label for="filterEnabled" style="margin:0;">启用低通滤波</label>
+
+      </div>
+
+      <div class="form-group">
+
+        <label>滤波截止频率 (Hz)</label>
+
+        <input type="number" id="filterCutoff" value="5.0" step="0.5">
+
+      </div>
+
+      <div class="form-group">
+
+        <label>S-N曲线斜率 m</label>
+
+        <input type="number" id="snM" value="3.0" step="0.1">
+
+      </div>
+
+      <div class="form-group">
+
+        <label>S-N曲线截距 logA</label>
+
+        <input type="number" id="snLogA" value="12.0" step="0.5">
+
+      </div>
+
+    </div>
+
+
+
+    <button class="btn btn-primary" id="runBtn" onclick="startAnalysis()">▶ 开始分析</button>
+
+
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+    <div class="status-text" id="statusText">就绪</div>
+
+
+
+    <div class="section" style="margin-top:16px;">
+
+      <div class="section-title">载荷数据导出</div>
+
+      <div class="export-box">
+
+        <div class="export-title">选择通道（随时间变化）:</div>
+
+        <div class="export-ch-list" id="exportChList">
+
+          <label><input type="checkbox" checked disabled> 请先运行分析</label>
+
+        </div>
+
+        <div class="export-row">
+
+          <select id="exportFormat">
+
+            <option value="excel">Excel (.xlsx)</option>
+
+            <option value="csv">CSV</option>
+
+            <option value="txt">TXT</option>
+
+          </select>
+
+          <button class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="exportChannelData()">导出</button>
+
+        </div>
+
+        <div style="font-size:11px; color:#888;" id="exportChMsg">运行分析后可选择常用通道导出</div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="section" style="margin-top:16px;">
+
+      <div class="section-title">分析结果报告导出</div>
+
+      <div class="export-box">
+
+        <div class="export-row">
+
+          <select id="reportFormat">
+
+            <option value="pdf">PDF</option>
+
+            <option value="word">Word</option>
+
+          </select>
+
+          <button class="btn btn-secondary" id="reportBtn" style="padding:5px 12px; font-size:12px;" disabled onclick="exportReport()">导出报告</button>
+
+        </div>
+
+        <div style="font-size:11px; color:#888;" id="reportMsg">分析完成后可导出完整报告</div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="section" style="margin-top:16px;">
+
+      <div class="section-title">运行日志</div>
+
+      <div class="log-box" id="logBox"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- 右侧结果区 -->
+
+  <div class="main">
+
+    <!-- 概览卡片 -->
+
+    <div class="cards">
+
+      <div class="card">
+
+        <div class="card-label">平均扭矩</div>
+
+        <div class="card-value blue" id="cardTorque">-- Nm</div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-label">平均推力</div>
+
+        <div class="card-value orange" id="cardThrust">-- N</div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-label">平均功率</div>
+
+        <div class="card-value green" id="cardPower">-- kW</div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="card-label">最不利叶片</div>
+
+        <div class="card-value red" id="cardCritical">--</div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- 标签页 -->
+
+    <div style="background:white; border-radius:8px; flex:1; display:flex; flex-direction:column; overflow:hidden;">
+
+      <div class="tabs">
+
+        <div class="tab active" onclick="switchTab('eog')">极限载荷分析</div>
+
+        <div class="tab" onclick="switchTab('fatigue')">疲劳分析</div>
+
+        <div class="tab" onclick="switchTab('synthesis')">叶片合成</div>
+
+        <div class="tab" onclick="switchTab('timeseries')">时序图表</div>
+        <div class="tab" onclick="switchTab('tower')">塔顶载荷分析</div>
+        <div class="tab" onclick="switchTab('batch')">批处理</div>
+
+        <div class="tab" onclick="switchTab('fast')">FAST 载荷</div>
+
+      </div>
+
+
+
+      <!-- 极限载荷标签页 -->
+
+      <div class="tab-content active" id="tab-eog">
+
+        <h3 style="font-size:14px; margin-bottom:10px;">叶片极限载荷极值汇总</h3>
+
+        <div id="eogTable">暂无数据</div>
+
+        <h3 style="font-size:14px; margin:16px 0 10px 0;">风轮极限载荷极值汇总</h3>
+
+        <div id="wheelExtremeTable">暂无数据</div>
+
+        <div class="chart-row">
+
+          <div class="chart-box">
+
+            <div class="chart-container" id="eogBarChart"></div>
+
+          </div>
+
+          <div class="chart-box">
+
+            <div class="chart-container" id="eogCompareChart"></div>
+
+          </div>
+
+        </div>
+
+        <div class="info-box" id="eogGlobalInfo"></div>
+        <div class="info-box" id="validationInfo">数据质量与坐标校验结果将在分析完成后显示</div>
+
+      </div>
+
+
+
+      <!-- 疲劳标签页 -->
+
+      <div class="tab-content" id="tab-fatigue">
+
+        <h3 style="font-size:14px; margin-bottom:10px;">叶片疲劳损伤汇总</h3>
+
+        <div id="fatigueTable">暂无数据</div>
+
+        <div class="chart-row">
+
+          <div class="chart-box">
+
+            <div class="chart-container" id="fatigueBarChart"></div>
+
+          </div>
+
+          <div class="chart-box">
+
+            <div class="chart-container" id="rainflowChart"></div>
+
+          </div>
+
+        </div>
+
+        <div class="info-box" id="fatigueInfo"></div>
+
+      </div>
+
+
+
+      <!-- 合成标签页 -->
+
+      <div class="tab-content" id="tab-synthesis">
+
+        <h3 style="font-size:14px; margin-bottom:10px;">多叶片载荷合成与不平衡度</h3>
+
+        <div class="info-box" id="synthInfo"></div>
+
+        <div class="chart-container" id="synthChart" style="height:350px; margin-top:12px;"></div>
+
+      </div>
+
+
+
+      <!-- 时序图表标签页 -->
+
+      <div class="tab-content" id="tab-timeseries">
+
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+
+          <label style="font-size:13px; white-space:nowrap;">布局:</label>
+
+          <button class="btn btn-secondary layout-btn active" onclick="setLayout('single')" data-layout="single">单视图</button>
+
+          <button class="btn btn-secondary layout-btn" onclick="setLayout('v2')" data-layout="v2">2视图纵向</button>
+
+          <button class="btn btn-secondary layout-btn" onclick="setLayout('v3')" data-layout="v3">3视图纵向</button>
+
+          <button class="btn btn-secondary layout-btn" onclick="setLayout('v4')" data-layout="v4">4视图纵向</button>
+
+          <button class="btn btn-secondary layout-btn" onclick="setLayout('h2')" data-layout="h2">2视图并排</button>
+
+          <button class="btn btn-secondary layout-btn" onclick="setLayout('grid2x2')" data-layout="grid2x2">2列2行</button>
+
+        </div>
+
+
+        <div id="multiViewContainer"></div>
+
+      </div>
+
+      <!-- 塔顶载荷分析标签页 -->
+      <div class="tab-content" id="tab-tower">
+        <h3 style="font-size:14px; margin-bottom:10px;">塔顶载荷分析</h3>
+        <div class="info-box" id="towerInfo">塔顶载荷通道：风轮推力(Momentary_Aerodynamic_Thrust)、风轮扭矩(Momentary_Aerodynamic_Torque)、倾覆弯矩</div>
+        <h4 style="font-size:13px; margin:12px 0 8px 0;">塔顶载荷汇总表</h4>
+        <div id="towerExtremeTable">暂无数据</div>
+        <h4 style="font-size:13px; margin:16px 0 8px 0;">塔顶载荷时序</h4>
+        <div class="chart-container" id="towerChart" style="height:360px;"></div>
+      </div>
+
+      <!-- 批处理标签页 -->
+      <div class="tab-content" id="tab-batch">
+        <h3 style="font-size:14px; margin-bottom:10px;">多工况批处理（IEC DLC载荷包络）</h3>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0; flex:1; min-width:320px;">
+            <label>工况目录（存放多个工况数据文件的文件夹）</label>
+            <div class="file-input">
+              <input type="text" id="batchDir" placeholder="如 D:/cases">
+              <button class="btn btn-secondary" onclick="openBatchDirBrowser()">浏览</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label>或 工况清单文件路径（可选，支持 cases.yaml / cases.csv / cases.txt）</label>
+          <input type="text" id="batchCasesFile" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size:13px;" placeholder="如 D:/cases.csv（留空则扫描工况目录）">
+        </div>
+        <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>叶片疲劳指数m</label>
+            <input type="number" id="batchBladeM" value="10" min="1" step="0.5" style="width:60px;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>塔顶疲劳指数m</label>
+            <input type="number" id="batchTowerM" value="3" min="1" step="0.5" style="width:60px;">
+          </div>
+          <span style="font-size:12px; color:#888;">串行处理（大文件内存考虑）</span>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+          <button class="btn btn-primary" style="width:auto; padding:8px 24px;" id="batchRunBtn" onclick="runBatch()">▶ 开始批处理</button>
+          <button class="btn btn-secondary" id="batchReportBtn" onclick="openBatchReportModal()" disabled>导出批处理报告</button>
+          <span class="status-text" id="batchStatus"></span>
+        </div>
+        <div id="batchResult" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- FAST 载荷标签页 -->
+      <div class="tab-content" id="tab-fast">
+        <div id="fastFileInfo" class="info-box"></div>
+        <h3 style="font-size:14px; margin:14px 0 10px 0;">风轮载荷极值汇总（AeroDyn Rotor）</h3>
+        <div id="fastRotorTable">暂无数据</div>
+        <div id="fastMissing" class="info-box" style="margin-top:10px;"></div>
+        <h3 style="font-size:14px; margin:16px 0 10px 0;">FAST 时序图表</h3>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+          <label style="font-size:13px; white-space:nowrap;">布局:</label>
+          <button class="btn btn-secondary layout-btn active" onclick="fastSetLayout('single')" data-fast-layout="single">单视图</button>
+          <button class="btn btn-secondary layout-btn" onclick="fastSetLayout('v2')" data-fast-layout="v2">2视图纵向</button>
+          <button class="btn btn-secondary layout-btn" onclick="fastSetLayout('v3')" data-fast-layout="v3">3视图纵向</button>
+          <button class="btn btn-secondary layout-btn" onclick="fastSetLayout('v4')" data-fast-layout="v4">4视图纵向</button>
+          <button class="btn btn-secondary layout-btn" onclick="fastSetLayout('h2')" data-fast-layout="h2">2视图并排</button>
+          <button class="btn btn-secondary layout-btn" onclick="fastSetLayout('grid2x2')" data-fast-layout="grid2x2">2列2行</button>
+        </div>
+        <div id="fastMultiViewContainer"></div>
+        <h3 style="font-size:14px; margin:16px 0 10px 0;">叶片节点载荷极值</h3>
+        <div id="fastBladeTable">暂无数据</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- 文件浏览器模态对话框 -->
+
+<div class="modal-overlay" id="fileBrowserModal">
+
+  <div class="modal-box">
+
+    <div class="modal-header">
+
+      <h3 id="fileBrowserTitle">选择数据文件</h3>
+
+      <button class="modal-close" onclick="closeFileBrowser()">&times;</button>
+
+    </div>
+
+    <div class="modal-path">
+
+      <button class="btn btn-secondary" id="browseBtn" onclick="enablePathInput()" title="点击可手动输入路径">浏览</button>
+
+      <input type="text" id="pathInput" readonly oninput="onPathInput()">
+
+      <button class="btn btn-secondary" style="padding:4px 12px; display:none;" id="goToPathBtn" onclick="goToPath()">前往</button>
+
+    </div>
+
+    <div class="modal-body" id="fileList"></div>
+
+    <div class="modal-footer">
+
+      <span class="selected-path" id="selectedFilePath">未选择文件</span>
+
+      <button class="btn btn-secondary" onclick="closeFileBrowser()">取消</button>
+
+      <button class="btn btn-primary" style="width:auto; padding:6px 20px;" onclick="confirmFileSelection()">确定</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- 导出对话框模态框 -->
+
+<div class="modal-overlay" id="exportModal">
+
+  <div class="modal-box" style="max-width:480px;">
+
+    <div class="modal-header">
+
+      <h3 id="exportModalTitle">导出</h3>
+
+      <button class="modal-close" onclick="closeExportModal()">&times;</button>
+
+    </div>
+
+    <div class="modal-body" style="padding:16px;">
+
+      <div class="form-group">
+
+        <label style="display:block; font-size:12px; color:#666; margin-bottom:4px;">文件名</label>
+
+        <input type="text" id="exportFileName" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+
+      </div>
+
+      <div class="form-group">
+
+        <label style="display:block; font-size:12px; color:#666; margin-bottom:4px;">保存目录</label>
+
+        <input type="text" id="exportDir" style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:4px; font-size:13px;">
+
+      </div>
+
+      <div style="font-size:11px; color:#888;" id="exportModalMsg"></div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button class="btn btn-secondary" onclick="closeExportModal()">取消</button>
+
+      <button class="btn btn-primary" style="width:auto; padding:6px 20px;" onclick="confirmExport()">确定</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+let results = null;
+
+let charts = {};
+
+
+
+function log(msg) {
+
+  const box = document.getElementById('logBox');
+
+  const time = new Date().toLocaleTimeString();
+
+  box.innerHTML += `[${time}] ${msg}\n`;
+
+  box.scrollTop = box.scrollHeight;
+
+}
+
+
+
+let currentBrowserPath = '';
+let selectedFile = '';
+let browserMode = 'file';  // 'file' 选择数据文件 / 'dir' 选择工况目录
+const LS_FILE_KEY = 'vawt_last_file_dir';
+const LS_DIR_KEY = 'vawt_last_batch_dir';
+
+
+
+async function browseFastFile() {
+
+  browserMode = 'fast';
+
+  document.getElementById('fileBrowserTitle').textContent = '选择 FAST 输出文件 (.out)';
+
+  document.getElementById('fileBrowserModal').classList.add('active');
+
+  document.getElementById('selectedFilePath').textContent = '未选择文件';
+
+  await loadDrives();
+
+  await loadDirectory(currentBrowserPath || browserPath('fast') || osPath());
+
+}
+
+
+async function browseFile() {
+
+  // 打开文件浏览器模态框（数据文件模式）
+
+  browserMode = 'file';
+
+  document.getElementById('fileBrowserTitle').textContent = '选择数据文件';
+
+  document.getElementById('fileBrowserModal').classList.add('active');
+
+  document.getElementById('selectedFilePath').textContent = '未选择文件';
+
+  await loadDrives();
+
+  await loadDirectory(currentBrowserPath || browserPath('file') || osPath());
+
+}
+
+
+
+function osPath() {
+
+  // 默认路径：优先数据文件所在 test 目录
+
+  return 'D:\\1worksfiles\\py\\laoshan\\ultrapost\\test';
+
+}
+
+// 记忆浏览器路径（按模式区分）
+function browserPath(mode) {
+  try {
+    const key = mode === 'dir' ? LS_DIR_KEY : LS_FILE_KEY;
+    const v = localStorage.getItem(key);
+    return v || '';
+  } catch (e) { return ''; }
+}
+
+function saveBrowserPath(mode, path) {
+  try {
+    const key = mode === 'dir' ? LS_DIR_KEY : LS_FILE_KEY;
+    if (path) localStorage.setItem(key, path);
+  } catch (e) {}
+}
+
+function dirOf(fp) {
+  const parts = fp.replace(/\\/g, '/').split('/');
+  parts.pop();
+  return parts.join('\\') || fp;
+}
+
+
+
+// 盘符下拉框已改为"浏览"按钮，此函数保留为空实现以兼容旧调用
+
+async function loadDrives() {}
+
+
+
+function enablePathInput() {
+
+  const input = document.getElementById('pathInput');
+
+  input.removeAttribute('readonly');
+
+  input.focus();
+
+  onPathInput();
+
+}
+
+
+
+function onPathInput() {
+
+  const input = document.getElementById('pathInput');
+
+  const btn = document.getElementById('goToPathBtn');
+
+  // 仅当用户手动输入内容时显示"前往"按钮
+
+  if (input.value.trim()) {
+
+    btn.style.display = '';
+
+  } else {
+
+    btn.style.display = 'none';
+
+  }
+
+}
+
+
+
+async function loadDirectory(path) {
+
+  if (!path) return;
+
+  currentBrowserPath = path;
+
+  document.getElementById('pathInput').value = path;
+
+  try {
+
+    const resp = await fetch(`/api/list_dir?path=${encodeURIComponent(path)}`);
+
+    const data = await resp.json();
+
+    if (data.error) {
+
+      document.getElementById('fileList').innerHTML = `<div style="padding:20px;color:#c62828;">无法访问: ${data.error}</div>`;
+
+      return;
+
+    }
+
+    renderFileList(data.entries);
+
+  } catch(e) {
+
+    document.getElementById('fileList').innerHTML = `<div style="padding:20px;color:#c62828;">加载失败: ${e.message}</div>`;
+
+  }
+
+}
+
+
+
+function renderFileList(entries) {
+
+  const container = document.getElementById('fileList');
+
+  if (!entries || entries.length === 0) {
+
+    container.innerHTML = '<div style="padding:20px;color:#999;text-align:center;">空目录</div>';
+
+    return;
+
+  }
+
+  let html = '';
+
+  entries.forEach(entry => {
+
+    const icon = entry.is_dir ? '📁' : (entry.name.endsWith('.txt') ? '📄' : '📎');
+
+    const size = entry.is_dir ? '' : formatSize(entry.size);
+
+    const cls = entry.is_dir ? 'dir' : 'file';
+
+    const clickHandler = entry.is_dir
+      ? `loadDirectory('${entry.path.replace(/\\/g, '\\\\')}')`
+      : (browserMode === 'dir'
+          ? 'return false;'
+          : `selectFile('${entry.path.replace(/\\/g, '\\\\')}', '${entry.name}')`);
+
+    html += `<div class="file-item ${cls}" onclick="${clickHandler}">
+
+      <span class="icon">${icon}</span>
+
+      <span class="name">${entry.name}</span>
+
+      <span class="size">${size}</span>
+
+    </div>`;
+
+  });
+
+  container.innerHTML = html;
+
+}
+
+
+
+function formatSize(bytes) {
+
+  if (bytes < 1024) return bytes + ' B';
+
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+
+}
+
+
+
+function selectFile(path, name) {
+
+  selectedFile = path;
+
+  document.getElementById('selectedFilePath').textContent = path;
+
+  // 高亮选中项
+
+  document.querySelectorAll('.file-item.file').forEach(el => el.style.background = '');
+
+  event.currentTarget.style.background = '#bbdefb';
+
+}
+
+
+
+function goToPath() {
+
+  const path = document.getElementById('pathInput').value.trim();
+
+  if (path) {
+
+    loadDirectory(path);
+
+    saveBrowserPath(browserMode, path);
+
+    // 恢复只读状态，隐藏前往按钮
+
+    const input = document.getElementById('pathInput');
+
+    input.setAttribute('readonly', 'readonly');
+
+    document.getElementById('goToPathBtn').style.display = 'none';
+
+  }
+
+}
+
+
+
+function closeFileBrowser() {
+
+  document.getElementById('fileBrowserModal').classList.remove('active');
+
+}
+
+
+
+function confirmFileSelection() {
+
+  if (browserMode === 'dir') {
+
+    // 目录模式：选择当前所在目录（逐级进入目标目录后点确定）
+    if (!currentBrowserPath) { alert('请先进入目标目录！'); return; }
+    document.getElementById('batchDir').value = currentBrowserPath;
+    saveBrowserPath('dir', currentBrowserPath);
+    closeFileBrowser();
+    return;
+  }
+
+  if (!selectedFile) {
+
+    alert('请先选择一个文件！');
+
+    return;
+
+  }
+
+  if (browserMode === 'fast') {
+
+    document.getElementById('fastFilepath').value = selectedFile;
+
+    saveBrowserPath('fast', dirOf(selectedFile));
+
+    closeFileBrowser();
+
+    previewFastFile(selectedFile);
+
+    return;
+
+  }
+
+  document.getElementById('filepath').value = selectedFile;
+
+  saveBrowserPath('file', dirOf(selectedFile));
+
+  closeFileBrowser();
+
+  previewFile(selectedFile);
+
+  updateProjectName(selectedFile);
+
+}
+
+
+
+function updateProjectName(filepath) {
+
+  // 从文件路径提取文件名作为项目名称（去除扩展名）
+
+  const parts = filepath.replace(/\\/g, '/').split('/');
+
+  const filename = parts[parts.length - 1] || filepath;
+
+  const baseName = filename.replace(/\.[^.]+$/, '');
+
+  document.getElementById('projectNameBox').style.display = '';
+
+  document.getElementById('projectNameValue').textContent = baseName || filename;
+
+}
+
+
+
+async function previewFile(filepath) {
+
+  try {
+
+    const resp = await fetch('/api/preview', {
+
+      method: 'POST',
+
+      headers: {'Content-Type': 'application/json'},
+
+      body: JSON.stringify({filepath})
+
+    });
+
+    const data = await resp.json();
+
+    document.getElementById('filePreview').textContent = data.info || data.error || '解析中...';
+
+  } catch(e) {
+
+    document.getElementById('filePreview').textContent = '预览失败: ' + e.message;
+
+  }
+
+}
+
+
+
+async function startAnalysis() {
+
+  const filepath = document.getElementById('filepath').value.trim();
+
+  if (!filepath) { alert('请先选择数据文件！'); return; }
+
+
+
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+
+  const btn = document.getElementById('runBtn');
+
+  btn.disabled = true;
+
+  btn.textContent = '分析中...';
+
+
+
+  const params = {
+
+    filepath,
+
+    mode,
+
+    include_panel: document.getElementById('includePanel').checked,
+
+    filter_enabled: document.getElementById('filterEnabled').checked,
+
+    filter_cutoff: parseFloat(document.getElementById('filterCutoff').value),
+
+    sn_m: parseFloat(document.getElementById('snM').value),
+
+    sn_log_a: parseFloat(document.getElementById('snLogA').value),
+
+  };
+
+
+
+  log(`开始分析: ${filepath.split('\\').pop()}`);
+
+  log(`模式: ${mode}, 面板数据: ${params.include_panel ? '是' : '否'}`);
+
+
+
+  try {
+
+    await fetch('/api/analyze', {
+
+      method: 'POST',
+
+      headers: {'Content-Type': 'application/json'},
+
+      body: JSON.stringify(params)
+
+    });
+
+    pollStatus();
+
+  } catch(e) {
+
+    log('启动失败: ' + e.message);
+
+    btn.disabled = false;
+
+    btn.textContent = '▶ 开始分析';
+
+  }
+
+}
+
+
+
+function pollStatus() {
+
+  const interval = setInterval(async () => {
+
+    try {
+
+      const resp = await fetch('/api/status');
+
+      const data = await resp.json();
+
+      document.getElementById('progressFill').style.width = data.progress + '%';
+
+      document.getElementById('statusText').textContent = data.status;
+
+
+
+      if (!data.is_running && data.progress >= 100) {
+
+        clearInterval(interval);
+
+        log('分析完成！');
+
+        document.getElementById('runBtn').disabled = false;
+
+        document.getElementById('runBtn').textContent = '▶ 开始分析';
+
+        loadResults();
+
+      } else if (!data.is_running && data.status.startsWith('错误')) {
+
+        clearInterval(interval);
+
+        log(data.status);
+
+        document.getElementById('runBtn').disabled = false;
+
+        document.getElementById('runBtn').textContent = '▶ 开始分析';
+
+      }
+
+    } catch(e) {}
+
+  }, 500);
+
+}
+
+
+
+async function loadResults() {
+
+  try {
+
+    const resp = await fetch('/api/results');
+
+    results = await resp.json();
+
+    renderResults();
+
+    loadChannels();
+
+    // 分析完成后启用报告导出按钮
+
+    const reportBtn = document.getElementById('reportBtn');
+
+    if (reportBtn) {
+
+      reportBtn.disabled = false;
+
+      document.getElementById('reportMsg').textContent = '报告导出已就绪';
+
+    }
+
+  } catch(e) {
+
+    log('加载结果失败: ' + e.message);
+
+  }
+
+}
+
+
+
+// 根据字段名返回关键参数样式类（用于各汇总表数值醒目显示）
+function keyCellClass(key) {
+  const k = String(key).toLowerCase();
+  if (k.includes('time')) return 'k-time';
+  if (k.includes('max')) return 'k-max';
+  if (k.includes('min')) return 'k-min';
+  if (k.includes('peak') || k.includes('imbalance') || k.includes('damage')
+      || k.includes('rms') || k.includes('ptp') || k.includes('amp')) return 'k-peak';
+  if (k.includes('mean') || k.includes('del') || k.includes('avg')) return 'k-val';
+  return '';
+}
+
+function renderResults() {
+
+  if (!results) return;
+
+
+
+  // 概览卡片
+
+  const ov = results.overview || {};
+  renderValidation(results.validation || {});
+
+  document.getElementById('cardTorque').textContent = ov.torque_mean ? ov.torque_mean.toLocaleString() + ' Nm' : '--';
+
+  document.getElementById('cardThrust').textContent = ov.thrust_mean ? ov.thrust_mean.toLocaleString() + ' N' : '--';
+
+  document.getElementById('cardPower').textContent = ov.power_mean_kw ? ov.power_mean_kw + ' kW' : '--';
+
+  document.getElementById('cardCritical').textContent = ov.critical_blade || '--';
+
+
+
+  // 极限载荷
+
+  if (results.eog || results.extreme) {
+
+    if (!results.eog && results.extreme) results.eog = results.extreme;
+
+    renderEOG();
+
+  }
+
+  function renderValidation(report) {
+    const box = document.getElementById('validationInfo');
+    if (!box) return;
+    const quality = report.quality || {};
+    const errors = report.errors || [];
+    const warnings = report.warnings || [];
+    const statusText = report.status === 'ok' ? '通过' : (report.status === 'warning' ? '有警告' : '有错误');
+    const statusColor = report.status === 'ok' ? '#2e7d32' : (report.status === 'warning' ? '#ef6c00' : '#c62828');
+    let html = `<b style="color:${statusColor}">数据质量与坐标校验：${statusText}</b>`;
+    html += `<br>行数: ${quality.rows || 0}，列数: ${quality.cols || 0}，NaN: ${quality.nan_count || 0}，Inf: ${quality.inf_count || 0}`;
+    if (errors.length) html += `<br><span class="highlight">错误：</span>${errors.join('；')}`;
+    if (warnings.length) html += `<br><span style="color:#ef6c00">警告：</span>${warnings.join('；')}`;
+    box.innerHTML = html;
+  }
+
+  // 疲劳
+
+  if (results.fatigue) renderFatigue();
+
+  // 合成
+
+  if (results.synthesis) renderSynthesis();
+
+  // 塔顶载荷分析
+  if (results.tower_top && Object.keys(results.tower_top).length) renderTower();
+
+}
+
+
+
+function renderEOG() {
+
+  const eog = results.eog;
+
+  if (eog.summary && eog.summary.length > 0) {
+
+    let html = '<table><thead><tr>';
+
+    Object.keys(eog.summary[0]).forEach(k => {
+
+      html += `<th>${k}</th>`;
+
+    });
+
+    html += '</tr></thead><tbody>';
+
+    eog.summary.forEach(row => {
+
+      html += '<tr>';
+
+      Object.keys(row).forEach(k => {
+
+        const v = row[k];
+
+        html += `<td class="${keyCellClass(k)}">${typeof v === 'number' ? v.toFixed(2) : v}</td>`;
+
+      });
+
+      html += '</tr>';
+
+    });
+
+    html += '</tbody></table>';
+
+    document.getElementById('eogTable').innerHTML = html;
+
+  }
+
+
+
+  // 柱状图
+
+  if (!charts.eogBar) charts.eogBar = echarts.init(document.getElementById('eogBarChart'));
+
+  const blades = eog.summary.map(r => r.blade_id);
+
+  const peakVals = eog.summary.map(r => r.combined_peak_value || 0);
+
+  charts.eogBar.setOption({
+
+    title: {text: '各叶片极限载荷合成载荷峰值', left: 'center', textStyle: {fontSize: 13}},
+
+    tooltip: {trigger: 'axis'},
+
+    xAxis: {type: 'category', data: blades},
+
+    yAxis: {type: 'value', name: 'N'},
+
+    series: [{type: 'bar', data: peakVals, itemStyle: {color: '#1565c0'},
+
+              label: {show: true, position: 'top', formatter: p => p.value.toFixed(0)}}],
+
+    grid: {top: 40, bottom: 30, left: 60, right: 20}
+
+  });
+
+
+
+  // 对比图
+
+  if (!charts.eogCompare) charts.eogCompare = echarts.init(document.getElementById('eogCompareChart'));
+
+  charts.eogCompare.setOption({
+
+    title: {text: '法向/切向载荷峰值对比', left: 'center', textStyle: {fontSize: 13}},
+
+    tooltip: {trigger: 'axis'},
+
+    legend: {bottom: 0},
+
+    xAxis: {type: 'category', data: blades},
+
+    yAxis: {type: 'value', name: 'N'},
+
+    series: [
+
+      {name: '法向峰值', type: 'bar', data: eog.summary.map(r => r.total_normal_max || 0), itemStyle: {color: '#ef6c00'}},
+
+      {name: '切向峰值', type: 'bar', data: eog.summary.map(r => r.total_tangential_max || 0), itemStyle: {color: '#2e7d32'}},
+
+    ],
+
+    grid: {top: 40, bottom: 40, left: 60, right: 20}
+
+  });
+
+
+
+  // 风轮极限载荷极值汇总表（推力/扭矩置顶，标注原变量名，含发生时刻）
+
+  const w = eog.wheel || {};
+
+  let wheelRows = [];
+
+  const fmt = v => typeof v === 'number' ? (Math.abs(v) < 0.01 ? v.toExponential(2) : v.toFixed(2)) : v;
+
+  const fmtT = v => typeof v === 'number' ? v.toFixed(2) + ' s' : (v || '-');
+
+  if (w.thrust_stats) wheelRows.push({载荷项: '风轮推力 (Momentary Aerodynamic Thrust [N])', 最大值: fmt(w.thrust_stats.max), 最大值时刻: fmtT(w.thrust_max_time), 最小值: fmt(w.thrust_stats.min), 最小值时刻: fmtT(w.thrust_min_time), 均值: fmt(w.thrust_stats.mean), 标准差: fmt(w.thrust_stats.std)});
+
+  if (w.torque_stats) wheelRows.push({载荷项: '风轮扭矩 (Momentary Aerodynamic Torque [Nm])', 最大值: fmt(w.torque_stats.max), 最大值时刻: fmtT(w.torque_max_time), 最小值: fmt(w.torque_stats.min), 最小值时刻: fmtT(w.torque_min_time), 均值: fmt(w.torque_stats.mean), 标准差: fmt(w.torque_stats.std)});
+
+  if (w.power_stats) wheelRows.push({载荷项: '风轮功率 (Momentary Aerodynamic Power [W])', 最大值: fmt(w.power_stats.max), 最大值时刻: fmtT(w.power_max_time), 最小值: fmt(w.power_stats.min), 最小值时刻: fmtT(w.power_min_time), 均值: fmt(w.power_stats.mean), 标准差: fmt(w.power_stats.std)});
+
+  if (w.overturning_moment_stats) wheelRows.push({载荷项: '倾覆弯矩 [Nm] (合力×叶高/2)', 最大值: fmt(w.overturning_moment_stats.max), 最大值时刻: '-', 最小值: fmt(w.overturning_moment_stats.min), 最小值时刻: '-', 均值: fmt(w.overturning_moment_stats.mean), 标准差: fmt(w.overturning_moment_stats.std)});
+
+  if (w.normal_peak_imbalance !== undefined) wheelRows.push({载荷项: '法向峰值不平衡度', 最大值: fmt(w.normal_peak_imbalance), 最大值时刻: '-', 最小值: '-', 最小值时刻: '-', 均值: '-', 标准差: '-'});
+
+  if (w.tangential_peak_imbalance !== undefined) wheelRows.push({载荷项: '切向峰值不平衡度', 最大值: fmt(w.tangential_peak_imbalance), 最大值时刻: '-', 最小值: '-', 最小值时刻: '-', 均值: '-', 标准差: '-'});
+
+  if (w.combined_peak_imbalance !== undefined) wheelRows.push({载荷项: '合成峰值不平衡度', 最大值: fmt(w.combined_peak_imbalance), 最大值时刻: '-', 最小值: '-', 最小值时刻: '-', 均值: '-', 标准差: '-'});
+
+  if (wheelRows.length > 0) {
+
+    let whtml = '<table><thead><tr><th>载荷项</th><th>最大值</th><th>最大值发生时刻</th><th>最小值</th><th>最小值发生时刻</th><th>均值</th><th>标准差</th></tr></thead><tbody>';
+
+    const wcolCls = ['', 'k-max', 'k-time', 'k-min', 'k-time', 'k-val', ''];
+
+    wheelRows.forEach(row => {
+
+      whtml += '<tr>';
+
+      Object.values(row).forEach((v, i) => { whtml += `<td class="${wcolCls[i] || ''}">${v}</td>`; });
+
+      whtml += '</tr>';
+
+    });
+
+    whtml += '</tbody></table>';
+
+    document.getElementById('wheelExtremeTable').innerHTML = whtml;
+
+  }
+
+
+
+  // 整机信息
+
+  let info = '';
+
+  if (w.critical_blade) info += `最不利叶片: <span class="highlight">${w.critical_blade}</span> (峰值=${w.critical_blade_load?.toFixed(1)} N)\n`;
+
+  if (w.combined_peak_imbalance) info += `叶片间峰值不平衡度: ${w.combined_peak_imbalance.toFixed(4)}\n`;
+
+  if (w.thrust_stats) info += `风轮推力: max=${w.thrust_stats.max?.toFixed(1)} N, mean=${w.thrust_stats.mean?.toFixed(1)} N\n`;
+
+  if (w.overturning_moment_stats) info += `倾覆弯矩: max=${w.overturning_moment_stats.max?.toFixed(1)} Nm, mean=${w.overturning_moment_stats.mean?.toFixed(1)} Nm\n`;
+
+  document.getElementById('eogGlobalInfo').textContent = info;
+
+}
+
+
+
+function renderFatigue() {
+
+  const fat = results.fatigue;
+
+  if (fat.summary && fat.summary.length > 0) {
+
+    let html = '<table><thead><tr>';
+
+    Object.keys(fat.summary[0]).forEach(k => {
+
+      html += `<th>${k}</th>`;
+
+    });
+
+    html += '</tr></thead><tbody>';
+
+    fat.summary.forEach(row => {
+
+      html += '<tr>';
+
+      Object.keys(row).forEach(k => {
+
+        const v = row[k];
+
+        html += `<td class="${keyCellClass(k)}">${typeof v === 'number' ? (Math.abs(v) < 0.01 ? v.toExponential(2) : v.toFixed(2)) : v}</td>`;
+
+      });
+
+      html += '</tr>';
+
+    });
+
+    html += '</tbody></table>';
+
+    document.getElementById('fatigueTable').innerHTML = html;
+
+  }
+
+
+
+  // 损伤柱状图
+
+  if (!charts.fatigueBar) charts.fatigueBar = echarts.init(document.getElementById('fatigueBarChart'));
+
+  const blades = fat.summary.map(r => r.blade_id);
+
+  const damages = fat.summary.map(r => r.combined_load_damage || 0);
+
+  charts.fatigueBar.setOption({
+
+    title: {text: '各叶片疲劳损伤 (合成载荷)', left: 'center', textStyle: {fontSize: 13}},
+
+    tooltip: {trigger: 'axis'},
+
+    xAxis: {type: 'category', data: blades},
+
+    yAxis: {type: 'value', name: 'Miner D', type: 'log'},
+
+    series: [{type: 'bar', data: damages, itemStyle: {color: '#c62828'},
+
+              label: {show: true, position: 'top', formatter: p => p.value.toExponential(2)}}],
+
+    grid: {top: 40, bottom: 30, left: 70, right: 20}
+
+  });
+
+
+
+  // 雨流谱
+
+  if (!charts.rainflow) charts.rainflow = echarts.init(document.getElementById('rainflowChart'));
+
+  const spectra = fat.spectra || {};
+
+  const firstBlade = Object.keys(spectra)[0];
+
+  if (firstBlade && spectra[firstBlade]) {
+
+    charts.rainflow.setOption({
+
+      title: {text: `${firstBlade} 载荷谱 (雨流计数)`, left: 'center', textStyle: {fontSize: 13}},
+
+      tooltip: {trigger: 'axis'},
+
+      xAxis: {type: 'category', data: spectra[firstBlade].ranges, name: '载荷范围'},
+
+      yAxis: {type: 'value', name: '循环次数', type: 'log'},
+
+      series: [{type: 'bar', data: spectra[firstBlade].counts, itemStyle: {color: '#1565c0'}}],
+
+      grid: {top: 40, bottom: 40, left: 70, right: 20}
+
+    });
+
+  }
+
+
+
+  // 信息
+
+  const w = fat.wheel || {};
+
+  let info = '';
+
+  info += `整机最大叶片损伤: ${(w.max_blade_damage || 0).toExponential(4)}\n`;
+
+  info += `整机平均叶片损伤: ${(w.mean_blade_damage || 0).toExponential(4)}\n`;
+
+  info += `损伤不平衡度: ${(w.damage_imbalance || 0).toFixed(4)}\n`;
+
+  info += `S-N参数: m=${results.overview?.sn_m || 3.0}, logA=${results.overview?.sn_log_a || 12.0}`;
+
+  document.getElementById('fatigueInfo').textContent = info;
+
+}
+
+
+
+function renderSynthesis() {
+
+  const syn = results.synthesis || {};
+
+  let html = '';
+
+  const sections = [];
+
+  if (syn.imbalance_normal) {
+
+    sections.push({title: '法向载荷不平衡度', rows: [
+
+      ['均值', syn.imbalance_normal.imbalance_mean?.toFixed(4)],
+
+      ['最大值', syn.imbalance_normal.imbalance_max?.toFixed(4)],
+
+    ]});
+
+  }
+
+  if (syn.imbalance_tangential) {
+
+    sections.push({title: '切向载荷不平衡度', rows: [
+
+      ['均值', syn.imbalance_tangential.imbalance_mean?.toFixed(4)],
+
+      ['最大值', syn.imbalance_tangential.imbalance_max?.toFixed(4)],
+
+    ]});
+
+  }
+
+  if (syn.pulsation) {
+
+    sections.push({title: '旋转脉动', rows: [
+
+      ['平均转速', syn.pulsation.avg_rpm?.toFixed(1) + ' rpm'],
+
+      ['脉动率', syn.pulsation.pulsation_ratio?.toFixed(4)],
+
+    ]});
+
+  }
+
+  sections.forEach(sec => {
+
+    html += `<table class="synth-table">
+
+      <thead><tr><th colspan="2">${sec.title}</th></tr></thead>
+
+      <tbody>`;
+
+    sec.rows.forEach(r => {
+
+      const cls = r[0].includes('最大') ? 'k-max' : (r[0].includes('均值') || r[0].includes('平均')) ? 'k-val' : r[0].includes('脉动') ? 'k-peak' : '';
+
+      html += `<tr><td>${r[0]}</td><td class="${cls}">${r[1]}</td></tr>`;
+
+    });
+
+    html += '</tbody></table>';
+
+  });
+
+  if (results.file_info) {
+
+    const fi = results.file_info;
+
+    html += `<div class="synth-file-info">📄 ${fi.filename} | ${fi.num_rows}行 x ${fi.num_cols}列 | ${fi.num_blades}叶片 x ${fi.num_panels}面板 | 采样率 ${fi.sample_rate} Hz</div>`;
+
+  }
+
+  document.getElementById('synthInfo').innerHTML = html;
+
+
+
+  // 合成载荷时序
+
+  if (!charts.synth) charts.synth = echarts.init(document.getElementById('synthChart'));
+
+  const ts = results.timeseries || {};
+
+  const t = ts.time || [];
+
+  const ch = ts.channels || {};
+
+  const series = [];
+
+  if (ch.blade1_normal) series.push({name: 'Blade1法向', type: 'line', data: t.map((ti, i) => [ti, ch.blade1_normal[i] ?? 0]), showSymbol: false, lineStyle: {width: 1}});
+
+  if (ch.blade2_normal) series.push({name: 'Blade2法向', type: 'line', data: t.map((ti, i) => [ti, ch.blade2_normal[i] ?? 0]), showSymbol: false, lineStyle: {width: 1}});
+
+  if (ch.blade3_normal) series.push({name: 'Blade3法向', type: 'line', data: t.map((ti, i) => [ti, ch.blade3_normal[i] ?? 0]), showSymbol: false, lineStyle: {width: 1}});
+
+  charts.synth.setOption({
+
+    title: {text: '各叶片法向载荷时序', left: 'center', textStyle: {fontSize: 13}},
+
+    tooltip: {trigger: 'axis'},
+
+    legend: {bottom: 0},
+
+    xAxis: {type: 'value', min: t[0], max: t[t.length - 1], name: 'Time [s]', axisLabel: {formatter: v => Math.round(v)}},
+
+    yAxis: {type: 'value', name: 'N'},
+
+    series: series,
+
+    grid: {top: 40, bottom: 40, left: 60, right: 20},
+
+    dataZoom: [{type: 'inside'}, {type: 'slider', height: 20, bottom: 30}]
+
+  });
+
+}
+
+
+
+// 常用通道定义（模糊匹配）
+
+const COMMON_CHANNELS = [
+
+  {pattern: /Momentary.*Aerodynamic.*Torque/i, label: '气动扭矩'},
+
+  {pattern: /Momentary.*Aerodynamic.*Thrust/i, label: '气动推力'},
+
+  {pattern: /Abs.*(Inflow|Wind).*Vel.*Hub/i, label: '轮毂入流风速'},
+
+  {pattern: /Momentary.*Aerodynamic.*Power/i, label: '气动功率'},
+
+  {pattern: /Rotational.*Speed/i, label: '转速'},
+
+];
+
+
+
+let allChannels = [];
+
+let currentLayout = 'single';
+
+let viewChannels = {};  // {viewId: channelName}
+
+
+
+async function loadChannels() {
+
+  try {
+
+    const resp = await fetch('/api/channels');
+
+    const data = await resp.json();
+
+    allChannels = data.channels || [];
+
+    // 初始化单视图
+
+    setLayout('single');
+
+    // 初始化导出通道列表
+
+    buildExportChannelList();
+
+  } catch(e) {}
+
+}
+
+
+
+function buildExportChannelList() {
+
+  const list = document.getElementById('exportChList');
+
+  if (!list) return;
+
+  if (!allChannels || allChannels.length === 0) {
+
+    list.innerHTML = '<label><input type="checkbox" disabled> 请先运行分析</label>';
+
+    return;
+
+  }
+
+  // 常用通道置顶
+
+  const commonKeys = ['Momentary_Aerodynamic_Thrust', 'Momentary_Aerodynamic_Torque',
+
+                      'Abs_Meas._Wind_Vel._at_Hub', 'Momentary_Aerodynamic_Power', 'Rotational_Speed'];
+
+  const commonMatches = [];
+
+  const rest = [];
+
+  allChannels.forEach(c => {
+
+    const hit = commonKeys.find(k => c.includes(k));
+
+    if (hit) commonMatches.push(c); else rest.push(c);
+
+  });
+
+  const all = [...commonMatches, ...rest];
+
+  let html = '';
+
+  all.forEach((c, i) => {
+
+    const checked = i < commonMatches.length ? 'checked' : '';
+
+    html += `<label><input type="checkbox" value="${c}" ${checked}> ${c}</label>`;
+
+  });
+
+  list.innerHTML = html;
+
+}
+
+
+
+// 导出对话框状态
+
+let pendingExport = null;
+let batchResults = null;
+
+
+
+// 获取项目名称
+
+function getProjectName() {
+
+  const v = document.getElementById('projectNameValue');
+
+  return v && v.textContent !== '--' ? v.textContent.trim() : '';
+
+}
+
+
+
+function openExportModal(type) {
+
+  const modal = document.getElementById('exportModal');
+
+  const projectName = getProjectName();
+
+  const defaultDir = 'D:/1worksfiles/py/laoshan/ultrapost/VAWT_Load_Processing/output';
+
+  if (type === 'channels') {
+
+    pendingExport = 'channels';
+
+    document.getElementById('exportModalTitle').textContent = '导出载荷数据';
+
+    const fmt = document.getElementById('exportFormat').value;
+
+    const ext = fmt === 'excel' ? 'xlsx' : fmt;
+
+    document.getElementById('exportFileName').value = (projectName || '载荷数据') + '_载荷数据.' + ext;
+
+  } else {
+
+    pendingExport = 'report';
+
+    document.getElementById('exportModalTitle').textContent = '导出分析报告';
+
+    const fmt = document.getElementById('reportFormat').value;
+
+    const ext = fmt === 'word' ? 'docx' : 'pdf';
+
+    document.getElementById('exportFileName').value = (projectName || '分析结果') + '_分析报告.' + ext;
+
+  }
+
+  document.getElementById('exportDir').value = defaultDir;
+
+  document.getElementById('exportModalMsg').textContent = '';
+
+  modal.classList.add('active');
+
+}
+
+
+
+function closeExportModal() {
+
+  document.getElementById('exportModal').classList.remove('active');
+
+  pendingExport = null;
+
+}
+
+
+
+async function confirmExport() {
+
+  if (!pendingExport) return;
+
+  const filename = document.getElementById('exportFileName').value.trim();
+
+  const dir = document.getElementById('exportDir').value.trim();
+
+  if (!filename) {
+
+    document.getElementById('exportModalMsg').textContent = '请输入文件名';
+
+    return;
+
+  }
+
+  document.getElementById('exportModalMsg').textContent = '正在导出...';
+
+  const projectName = getProjectName();
+
+  try {
+
+    let resp, data;
+
+    if (pendingExport === 'channels') {
+
+      const checkboxes = document.querySelectorAll('#exportChList input[type="checkbox"]:checked');
+
+      const channels = Array.from(checkboxes).map(cb => cb.value);
+
+      if (channels.length === 0) {
+
+        document.getElementById('exportModalMsg').textContent = '请至少选择一个通道';
+
+        return;
+
+      }
+
+      const fmt = document.getElementById('exportFormat').value;
+
+      resp = await fetch('/api/export_channels', {
+
+        method: 'POST',
+
+        headers: {'Content-Type': 'application/json'},
+
+        body: JSON.stringify({channels, format: fmt, filename, dir, project_name: projectName})
+
+      });
+
+    } else if (pendingExport === 'batch_report') {
+
+      const fmt = document.getElementById('reportFormat').value;
+
+      resp = await fetch('/api/batch_report', {
+
+        method: 'POST',
+
+        headers: {'Content-Type': 'application/json'},
+
+        body: JSON.stringify({format: fmt, filename, output_dir: dir})
+
+      });
+
+    } else {
+
+      const fmt = document.getElementById('reportFormat').value;
+
+      resp = await fetch('/api/export_report', {
+
+        method: 'POST',
+
+        headers: {'Content-Type': 'application/json'},
+
+        body: JSON.stringify({format: fmt, filename, dir, project_name: projectName})
+
+      });
+
+    }
+
+    data = await resp.json();
+
+    if (data.error) {
+
+      document.getElementById('exportModalMsg').textContent = '导出失败: ' + data.error;
+
+      return;
+
+    }
+
+    // 触发下载（a标签方式，不跳新页）
+
+    triggerDownload(data.filepath, data.filename);
+
+    closeExportModal();
+
+    if (pendingExport === 'channels') {
+
+      document.getElementById('exportChMsg').textContent = '已导出: ' + data.filename;
+
+      log('载荷数据已导出: ' + data.filename);
+
+    } else if (pendingExport === 'batch_report') {
+
+      document.getElementById('reportMsg').textContent = '批处理报告已生成: ' + data.filename;
+
+      log('批处理报告已导出: ' + data.filename);
+
+    } else {
+
+      document.getElementById('reportMsg').textContent = '报告已生成: ' + data.filename;
+
+      log('分析报告已导出: ' + data.filename);
+
+    }
+
+  } catch(e) {
+
+    document.getElementById('exportModalMsg').textContent = '导出失败: ' + e.message;
+
+  }
+
+}
+
+
+
+// 通过后端下载文件（fetch blob + a标签）
+
+async function triggerDownload(filepath, filename) {
+
+  const url = '/api/download?path=' + encodeURIComponent(filepath);
+
+  const resp = await fetch(url);
+
+  const blob = await resp.blob();
+
+  const a = document.createElement('a');
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = filename;
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  URL.revokeObjectURL(a.href);
+
+  a.remove();
+
+}
+
+
+
+function exportChannelData() { openExportModal('channels'); }
+
+function exportReport() { openExportModal('report'); }
+
+
+
+function buildChannelSelect(selectId, selectedChannel) {
+
+  const sel = document.getElementById(selectId);
+
+  if (!sel) return;
+
+  sel.innerHTML = '';
+
+  // 常用通道分组
+
+  const commonGroup = document.createElement('optgroup');
+
+  commonGroup.label = '★ 常用通道';
+
+  const matchedCommon = new Set();
+
+  COMMON_CHANNELS.forEach(cc => {
+
+    const match = allChannels.find(c => cc.pattern.test(c));
+
+    if (match) {
+
+      const opt = document.createElement('option');
+
+      opt.value = match;
+
+      opt.textContent = cc.label + ' - ' + match;
+
+      commonGroup.appendChild(opt);
+
+      matchedCommon.add(match);
+
+    }
+
+  });
+
+  if (commonGroup.children.length > 0) sel.appendChild(commonGroup);
+
+  // 全部通道分组
+
+  const allGroup = document.createElement('optgroup');
+
+  allGroup.label = '全部通道';
+
+  allChannels.forEach(c => {
+
+    if (!matchedCommon.has(c)) {
+
+      const opt = document.createElement('option');
+
+      opt.value = c; opt.textContent = c;
+
+      allGroup.appendChild(opt);
+
+    }
+
+  });
+
+  sel.appendChild(allGroup);
+
+  if (selectedChannel && allChannels.includes(selectedChannel)) sel.value = selectedChannel;
+
+}
+
+
+
+function setLayout(layout) {
+
+  currentLayout = layout;
+
+  // 更新按钮状态
+
+  document.querySelectorAll('.layout-btn').forEach(b => {
+
+    b.classList.toggle('active', b.dataset.layout === layout);
+
+  });
+
+  // 销毁旧图表
+
+  Object.keys(charts).forEach(k => {
+
+    if (k.startsWith('view_')) { charts[k].dispose(); delete charts[k]; }
+
+  });
+
+  const container = document.getElementById('multiViewContainer');
+
+  container.innerHTML = '';
+
+
+
+  const layouts = {
+
+    single: {count: 1, cols: 1},
+
+    v2: {count: 2, cols: 1},
+
+    v3: {count: 3, cols: 1},
+
+    v4: {count: 4, cols: 1},
+
+    h2: {count: 2, cols: 2},
+
+    grid2x2: {count: 4, cols: 2},
+
+  };
+
+  const cfg = layouts[layout] || layouts.single;
+
+  const defaults = ['Momentary_Aerodynamic_Torque_[Nm]', 'Momentary_Aerodynamic_Thrust_[N]',
+
+                    'Abs_Meas._Wind_Vel._at_Hub_[m/s]', 'Momentary_Aerodynamic_Power_[W]'];
+
+
+
+  // 创建网格容器
+
+  const grid = document.createElement('div');
+
+  if (cfg.cols === 2) grid.className = 'view-grid-2col';
+
+
+
+  for (let i = 0; i < cfg.count; i++) {
+
+    const viewId = 'view_' + i;
+
+    const panel = document.createElement('div');
+
+    panel.className = 'view-panel';
+
+    panel.innerHTML = `
+
+      <div class="view-panel-header">
+
+        <label>视图${i+1}:</label>
+
+        <select id="${viewId}_select" onchange="drawViewChart('${viewId}')"></select>
+
+      </div>
+
+      <div class="view-chart" id="${viewId}_chart"></div>
+
+      <div class="view-stats" id="${viewId}_stats"></div>
+
+    `;
+
+    grid.appendChild(panel);
+
+    // 保存默认通道
+
+    const defCh = defaults[i] && allChannels.includes(defaults[i]) ? defaults[i] : allChannels[0];
+
+    viewChannels[viewId] = defCh;
+
+  }
+
+  container.appendChild(grid);
+
+
+
+  // 填充下拉框并绘制
+
+  for (let i = 0; i < cfg.count; i++) {
+
+    const viewId = 'view_' + i;
+
+    buildChannelSelect(viewId + '_select', viewChannels[viewId]);
+
+    setTimeout(() => drawViewChart(viewId), 50 * i);
+
+  }
+
+}
+
+
+
+async function drawViewChart(viewId) {
+
+  const sel = document.getElementById(viewId + '_select');
+
+  const channel = sel ? sel.value : viewChannels[viewId];
+
+  if (!channel) return;
+
+  viewChannels[viewId] = channel;
+
+  try {
+
+    const resp = await fetch('/api/channel_data', {
+
+      method: 'POST',
+
+      headers: {'Content-Type': 'application/json'},
+
+      body: JSON.stringify({channel})
+
+    });
+
+    const data = await resp.json();
+
+    const chartId = viewId + '_chart';
+
+    if (!charts[viewId]) charts[viewId] = echarts.init(document.getElementById(chartId));
+
+    charts[viewId].setOption({
+
+      title: {text: channel, left: 'center', textStyle: {fontSize: 12}},
+
+      tooltip: {trigger: 'axis'},
+
+      xAxis: {type: 'value', name: 'Time [s]', nameTextStyle: {fontSize: 10},
+              min: data.time[0], max: data.time[data.time.length - 1],
+              axisLabel: {formatter: v => Math.round(v)}},
+
+      yAxis: {type: 'value'},
+
+      series: [{type: 'line', data: data.time.map((t, i) => [t, data.values[i]]), showSymbol: false, lineStyle: {width: 1, color: '#1565c0'},
+
+                markPoint: {data: [{name: '最大值', coord: [data.time[data.max_idx ?? 0], data.max],
+                                    itemStyle: {color: '#c62828'}, symbol: 'pin', symbolSize: 36,
+                                    label: {formatter: () => '最大值=' + Number(data.max).toFixed(1),
+                                            fontSize: 10, color: '#fff', backgroundColor: 'rgba(198,40,40,0.85)',
+                                            padding: [3, 6], borderRadius: 3}}]},
+
+                markLine: {
+
+                  silent: false,
+
+                  symbol: 'none',
+
+                  data: [{yAxis: data.mean, name: '均值',
+
+                          lineStyle: {color: '#ef6c00', width: 1.5, type: 'dashed'},
+
+                          label: {formatter: '均值=' + Number(data.mean).toFixed(2), position: 'insideEndTop',
+
+                                  fontSize: 12, color: '#fff', backgroundColor: 'rgba(239,108,0,0.85)',
+
+                                  padding: [4, 8], borderRadius: 3},
+
+                          draggable: true}]
+
+                },
+
+                areaStyle: {color: 'rgba(21,101,192,0.1)'}}],
+
+      grid: {top: 40, bottom: 30, left: 60, right: 20},
+
+      dataZoom: [{type: 'inside'}]
+
+    });
+
+    document.getElementById(viewId + '_stats').innerHTML =
+
+      `<table class="mini-stats-row">
+
+        <tr>
+
+          <td class="k-val">均值=${data.mean?.toFixed(2)}</td>
+
+          <td class="k-max">最大值=${data.max?.toFixed(2)}</td>
+
+          <td class="k-min">最小值=${data.min?.toFixed(2)}</td>
+
+          <td>标准差=${data.std?.toFixed(2)}</td>
+
+        </tr>
+
+      </table>`;
+
+  } catch(e) {}
+
+}
+
+
+
+function switchTab(name) {
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+  event.currentTarget.classList.add('active');
+
+  document.getElementById('tab-' + name).classList.add('active');
+
+  // 重新调整图表大小
+
+  setTimeout(() => {
+
+    Object.values(charts).forEach(c => c && c.resize());
+
+  }, 100);
+
+  // 切换到时序标签时重绘多视图
+
+  if (name === 'timeseries') {
+
+    setTimeout(() => {
+
+      Object.keys(viewChannels).forEach(vid => drawViewChart(vid));
+
+    }, 150);
+
+  }
+
+  // 切到塔顶标签时重绘塔顶图
+  if (name === 'tower' && typeof renderTowerChart === 'function') {
+
+    setTimeout(() => renderTowerChart(), 150);
+
+  }
+
+  // 切到批处理标签时若有结果重绘
+  if (name === 'batch' && batchResults) {
+
+    setTimeout(() => renderBatchResult(batchResults), 100);
+
+  }
+
+  // 切到 FAST 标签时若有结果重绘（容器可见后再重绘并修正画布尺寸）
+  if (name === 'fast' && fastResults) {
+
+    setTimeout(() => { Object.keys(fastViewChannels).forEach(vid => fastDrawViewChart(vid)); }, 150);
+
+    setTimeout(() => { Object.values(charts).forEach(c => { if (c) c.resize(); }); }, 250);
+
+  }
+
+}
+
+
+
+
+// ============================================================
+// FAST 载荷分析（OpenFAST/AeroDyn 独立入口）
+// ============================================================
+let fastResults = null;
+let fastLayout = 'single';
+let fastViewChannels = {};   // {viewId: channelKey}
+let fastAllChannels = [];    // FAST 可用通道（特殊键 + 原始列）
+const FAST_CHANNEL_MAP = {'thrust':'风轮推力','torque':'风轮扭矩','power':'风轮功率','rpm':'转速','tsr':'叶尖速比','wind_speed':'风速'};
+
+function previewFastFile(filepath) {
+  document.getElementById('fastPreview').textContent = '已选择: ' + filepath;
+}
+
+async function runFastAnalysis() {
+  const filepath = document.getElementById('fastFilepath').value.trim();
+  if (!filepath) { alert('请先选择 FAST 输出文件！'); return; }
+  const btn = document.getElementById('fastRunBtn');
+  btn.disabled = true;
+  btn.textContent = '分析中...';
+  log(`开始 FAST 分析: ${filepath.split('\\').pop()}`);
+  try {
+    await fetch('/api/fast_analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({filepath})
+    });
+    pollFastStatus();
+  } catch(e) {
+    log('FAST 分析启动失败: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'FAST 分析';
+  }
+}
+
+function pollFastStatus() {
+  const interval = setInterval(async () => {
+    try {
+      const resp = await fetch('/api/status');
+      const data = await resp.json();
+      document.getElementById('progressFill').style.width = data.progress + '%';
+      document.getElementById('statusText').textContent = data.status;
+      if (!data.is_running && data.progress >= 100) {
+        clearInterval(interval);
+        log('FAST 分析完成！');
+        document.getElementById('fastRunBtn').disabled = false;
+        document.getElementById('fastRunBtn').textContent = 'FAST 分析';
+        await loadFastResults();
+        switchTab('fast');
+      } else if (!data.is_running && data.status.startsWith('错误')) {
+        clearInterval(interval);
+        log(data.status);
+        document.getElementById('fastRunBtn').disabled = false;
+        document.getElementById('fastRunBtn').textContent = 'FAST 分析';
+      }
+    } catch(e) {
+      clearInterval(interval);
+      document.getElementById('fastRunBtn').disabled = false;
+      document.getElementById('fastRunBtn').textContent = 'FAST 分析';
+    }
+  }, 1000);
+}
+
+async function loadFastResults() {
+  try {
+    const resp = await fetch('/api/fast_results');
+    const data = await resp.json();
+    if (data.error) { alert(data.error); return; }
+    fastResults = data;
+    renderFastResults();
+  } catch(e) {
+    log('加载 FAST 结果失败: ' + e.message);
+  }
+}
+
+function renderFastResults() {
+  if (!fastResults) return;
+  const fi = fastResults.file_info || {};
+  const info = [
+    ['文件', fi.filename || '-'],
+    ['大小', fi.size_mb != null ? fi.size_mb + ' MB' : '-'],
+    ['数据', (fi.num_rows||'-') + ' 行 x ' + (fi.num_cols||'-') + ' 列'],
+    ['叶片/节点', (fi.num_blades||'-') + ' 叶片 x ' + (fi.num_nodes||'-') + ' 节点'],
+    ['采样率', fi.sample_rate ? fi.sample_rate + ' Hz' : '-'],
+    ['时长', fi.duration != null ? fi.duration + ' s' : '-'],
+    ['生成信息', fi.generator || '-']
+  ];
+  document.getElementById('fastFileInfo').innerHTML =
+    '<table class="stat-table"><tbody>' +
+    info.map(r => `<tr><td class="k-val">${r[0]}</td><td>${r[1]}</td></tr>`).join('') +
+    '</tbody></table>';
+
+  const missing = fastResults.missing || [];
+  const missEl = document.getElementById('fastMissing');
+  if (missing.length) {
+    missEl.innerHTML = '<div style="color:#ef6c00;font-weight:bold;">注意: 以下关键变量未在输出文件中（如需对应载荷分析，请在 AeroDyn OutList 中按 OpenFAST 命名补充输出）：</div>' +
+      '<div style="font-family:monospace;font-size:12px;color:#616161;margin-top:4px;">' + missing.join(', ') + '</div>';
+  } else {
+    missEl.innerHTML = '<div style="color:#2e7d32;font-weight:bold;">所有关键变量均已输出。</div>';
+  }
+
+  renderFastRotorTable(fastResults.rotor || {});
+  renderFastBladeTable(fastResults.blades || {});
+
+  // 时序多视图：常用通道（特殊键）+ 全量原始列
+  fastAllChannels = [];
+  const ts = fastResults.timeseries || {};
+  Object.keys(ts.channels || {}).forEach(k => { if (!fastAllChannels.includes(k)) fastAllChannels.push(k); });
+  fetch('/api/fast_channels').then(r => r.json()).then(d => {
+    (d.channels || []).forEach(c => { if (!fastAllChannels.includes(c)) fastAllChannels.push(c); });
+    fastSetLayout(fastLayout);
+  }).catch(() => fastSetLayout(fastLayout));
+}
+
+function renderFastRotorTable(rotor) {
+  const rows = [];
+  if (rotor.thrust_stats) {
+    const s = rotor.thrust_stats;
+    rows.push(['风轮推力', s.max, s.min, s.mean, s.std, rotor.thrust_max_time, rotor.thrust_min_time, 'N', rotor.thrust_source || '-']);
+  }
+  if (rotor.torque_stats) {
+    const s = rotor.torque_stats;
+    rows.push(['风轮扭矩', s.max, s.min, s.mean, s.std, rotor.torque_max_time, rotor.torque_min_time, 'N·m', rotor.torque_source || '-']);
+  }
+  if (rotor.power_stats) {
+    const s = rotor.power_stats;
+    rows.push(['风轮功率', s.max, s.min, s.mean, s.std, rotor.power_max_time, rotor.power_min_time, 'W', 'RtAeroPwr']);
+  }
+  if (rotor.rpm_stats) {
+    const s = rotor.rpm_stats;
+    rows.push(['转速', s.max, s.min, s.mean, s.std, '', '', 'rpm', 'RtSpeed']);
+  }
+  if (rotor.tsr_stats) {
+    const s = rotor.tsr_stats;
+    rows.push(['叶尖速比', s.max, s.min, s.mean, s.std, '', '', '-', 'RtTSR']);
+  }
+  if (!rows.length) {
+    document.getElementById('fastRotorTable').innerHTML = '暂无风轮载荷数据';
+    return;
+  }
+  const head = ['载荷', '最大值', '最小值', '平均值', '标准差', '最大时刻(s)', '最小时刻(s)', '单位', '来源变量'];
+  document.getElementById('fastRotorTable').innerHTML =
+    '<table class="data-table"><thead><tr>' + head.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>' +
+    rows.map(r => `<tr>${r.map((c,i)=>`<td class="${i===1?'k-max':(i===2?'k-min':(i===3?'k-val':''))}">${c===null||c===undefined?'-':c}</td>`).join('')}</tr>`).join('') +
+    '</tbody></table>';
+}
+
+function renderFastBladeTable(blades) {
+  const cont = document.getElementById('fastBladeTable');
+  const keys = Object.keys(blades);
+  if (!keys.length) {
+    cont.innerHTML = '暂无叶片节点载荷（当前输出文件未包含叶片载荷，请在 OutList 中补充 B*N*Fx / Fy / Fn / Ft / Mm 等变量）';
+    return;
+  }
+  let html = '';
+  keys.forEach(bk => {
+    const b = blades[bk];
+    html += `<div style="font-weight:bold;margin:8px 0 4px 0;">${bk}（节点载荷类型: ${(b.suffixes_available||[]).join(', ') || '-'}）</div>`;
+    html += '<table class="data-table"><thead><tr><th>节点</th><th>载荷</th><th>最大值</th><th>最小值</th><th>平均值</th><th>标准差</th></tr></thead><tbody>';
+    Object.keys(b.nodes || {}).sort((a,c)=>+a-+c).forEach(n => {
+      const nv = b.nodes[n];
+      Object.keys(nv).forEach(suf => {
+        const s = nv[suf];
+        html += `<tr><td>节点${n}</td><td>${suf}</td><td class="k-max">${fmtNum2(s.max)}</td><td class="k-min">${fmtNum2(s.min)}</td><td class="k-val">${fmtNum2(s.mean)}</td><td>${fmtNum2(s.std)}</td></tr>`;
+      });
+    });
+    html += '</tbody></table>';
+  });
+  cont.innerHTML = html;
+}
+
+function fastSetLayout(layout) {
+  fastLayout = layout;
+  // 更新按钮状态
+  document.querySelectorAll('[data-fast-layout]').forEach(b => {
+    b.classList.toggle('active', b.dataset.fastLayout === layout);
+  });
+  // 销毁旧 FAST 视图图表
+  Object.keys(charts).forEach(k => {
+    if (k.startsWith('view_fast_')) { charts[k].dispose(); delete charts[k]; }
+  });
+  const container = document.getElementById('fastMultiViewContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const layouts = {
+    single: {count: 1, cols: 1},
+    v2: {count: 2, cols: 1},
+    v3: {count: 3, cols: 1},
+    v4: {count: 4, cols: 1},
+    h2: {count: 2, cols: 2},
+    grid2x2: {count: 4, cols: 2},
+  };
+  const cfg = layouts[layout] || layouts.single;
+
+  // 默认通道：优先可用的常用通道
+  const commonKeys = Object.keys(FAST_CHANNEL_MAP).filter(k => fastAllChannels.includes(k));
+  const defaults = commonKeys.length ? commonKeys : (fastAllChannels[0] ? [fastAllChannels[0]] : ['']);
+
+  const grid = document.createElement('div');
+  if (cfg.cols === 2) grid.className = 'view-grid-2col';
+
+  for (let i = 0; i < cfg.count; i++) {
+    const viewId = 'view_fast_' + i;
+    const panel = document.createElement('div');
+    panel.className = 'view-panel';
+    panel.innerHTML = `
+      <div class="view-panel-header">
+        <label>视图${i+1}:</label>
+        <select id="${viewId}_select" onchange="fastDrawViewChart('${viewId}')"></select>
+      </div>
+      <div class="view-chart" id="${viewId}_chart"></div>
+      <div class="view-stats" id="${viewId}_stats"></div>
+    `;
+    grid.appendChild(panel);
+    const defCh = defaults[i] && fastAllChannels.includes(defaults[i]) ? defaults[i] : (fastAllChannels[0] || '');
+    fastViewChannels[viewId] = defCh;
+  }
+  container.appendChild(grid);
+
+  // 填充下拉框并绘制
+  for (let i = 0; i < cfg.count; i++) {
+    const viewId = 'view_fast_' + i;
+    buildFastChannelSelect(viewId + '_select', fastViewChannels[viewId]);
+    setTimeout(() => fastDrawViewChart(viewId), 50 * i);
+  }
+}
+
+function buildFastChannelSelect(selectId, selected) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  // 常用通道分组
+  const commonGroup = document.createElement('optgroup');
+  commonGroup.label = '★ 常用通道';
+  const commonKeys = Object.keys(FAST_CHANNEL_MAP).filter(k => fastAllChannels.includes(k));
+  commonKeys.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = '★ ' + (FAST_CHANNEL_MAP[k] || k);
+    commonGroup.appendChild(opt);
+  });
+  if (commonGroup.children.length > 0) sel.appendChild(commonGroup);
+  // 全部原始变量分组
+  const allGroup = document.createElement('optgroup');
+  allGroup.label = '全部原始变量';
+  fastAllChannels.forEach(c => {
+    if (commonKeys.includes(c)) return;
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    allGroup.appendChild(opt);
+  });
+  if (allGroup.children.length > 0) sel.appendChild(allGroup);
+  // 选择默认
+  if (selected && [...sel.options].some(o => o.value === selected)) {
+    sel.value = selected;
+  } else if (commonGroup.children.length) {
+    sel.value = commonGroup.children[0].value;
+  }
+}
+
+async function fastDrawViewChart(viewId) {
+  const sel = document.getElementById(viewId + '_select');
+  const channel = sel ? sel.value : fastViewChannels[viewId];
+  if (!channel) return;
+  fastViewChannels[viewId] = channel;
+  const statsEl = document.getElementById(viewId + '_stats');
+  try {
+    const resp = await fetch('/api/fast_channel_data', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({channel})
+    });
+    const data = await resp.json();
+    if (data.error) {
+      if (statsEl) statsEl.innerHTML = '<div style="color:#c62828;font-size:12px;">' + data.error + '</div>';
+      return;
+    }
+    const chartId = viewId + '_chart';
+    if (!charts[viewId]) charts[viewId] = echarts.init(document.getElementById(chartId));
+    charts[viewId].setOption({
+      title: {text: (FAST_CHANNEL_MAP[channel] || channel), left: 'center', textStyle: {fontSize: 12}},
+      tooltip: {trigger: 'axis'},
+      xAxis: {type: 'value', name: 'Time [s]', nameTextStyle: {fontSize: 10},
+              min: data.time[0], max: data.time[data.time.length - 1],
+              axisLabel: {formatter: v => Math.round(v)}},
+      yAxis: {type: 'value'},
+      series: [{type: 'line', data: data.time.map((t, i) => [t, data.values[i]]), showSymbol: false, lineStyle: {width: 1, color: '#1565c0'},
+                markPoint: {data: [{name: '最大值', coord: [data.time[data.max_idx ?? 0], data.max],
+                                    itemStyle: {color: '#c62828'}, symbol: 'pin', symbolSize: 36,
+                                    label: {formatter: () => '最大值=' + Number(data.max).toFixed(1),
+                                            fontSize: 10, color: '#fff', backgroundColor: 'rgba(198,40,40,0.85)',
+                                            padding: [3, 6], borderRadius: 3}}]},
+                markLine: {
+                  silent: false,
+                  symbol: 'none',
+                  data: [{yAxis: data.mean, name: '均值',
+                          lineStyle: {color: '#ef6c00', width: 1.5, type: 'dashed'},
+                          label: {formatter: '均值=' + Number(data.mean).toFixed(2), position: 'insideEndTop',
+                                  fontSize: 12, color: '#fff', backgroundColor: 'rgba(239,108,0,0.85)',
+                                  padding: [4, 8], borderRadius: 3},
+                          draggable: true}]
+                },
+                areaStyle: {color: 'rgba(21,101,192,0.1)'}}],
+      grid: {top: 40, bottom: 30, left: 60, right: 20},
+      dataZoom: [{type: 'inside'}]
+    });
+    // 关键信息表格（最大/最小/平均/标准差）
+    if (statsEl) {
+      statsEl.innerHTML = `<table class="mini-stats-row"><tr>
+          <td class="k-val">均值=${data.mean != null ? data.mean.toFixed(2) : '-'}</td>
+          <td class="k-max">最大值=${data.max != null ? data.max.toFixed(2) : '-'}</td>
+          <td class="k-min">最小值=${data.min != null ? data.min.toFixed(2) : '-'}</td>
+          <td>标准差=${data.std != null ? data.std.toFixed(2) : '-'}</td>
+        </tr></table>`;
+    }
+    // 关键修复：容器布局未完成时 init 会读到错误宽度（如100px而非实际宽度），
+    // 导致图表被画在极窄画布上、曲线与刻度错乱。延迟 resize 强制按容器实际尺寸重绘。
+    setTimeout(() => { if (charts[viewId] && document.getElementById(chartId).offsetWidth > 0) charts[viewId].resize(); }, 60);
+  } catch(e) { console.error(e); }
+}
+
+
+// ============================================================
+// 塔顶载荷分析渲染
+// ============================================================
+function fmtNum2(v) {
+  if (v === null || v === undefined) return '-';
+  if (typeof v !== 'number') return v;
+  if (Math.abs(v) < 0.01 && v !== 0) return v.toExponential(2);
+  return v.toFixed(2);
+}
+
+function fmtT2(v) {
+  if (typeof v === 'number') return v.toFixed(2) + ' s';
+  return (v || '-');
+}
+
+function downsample(arr, maxPts) {
+  if (!arr || arr.length <= maxPts) return arr;
+  const step = Math.ceil(arr.length / maxPts);
+  const out = [];
+  for (let i = 0; i < arr.length; i += step) out.push(arr[i]);
+  return out;
+}
+
+function renderTower() {
+  const tt = (results && results.tower_top) || {};
+  const ext = tt.extreme || {};
+  const fa = tt.fatigue || {};
+  const el = document.getElementById('towerExtremeTable');
+  if (!el) return;
+  const chNames = {
+    thrust: '风轮推力 [N] (Momentary_Aerodynamic_Thrust_[N])',
+    torque: '风轮扭矩 [Nm] (Momentary_Aerodynamic_Torque_[Nm])',
+    overturning_moment: '倾覆弯矩 [Nm]',
+    resultant: '塔顶合力 [N]'
+  };
+  const keys = Object.keys(ext);
+  const infoEl = document.getElementById('towerInfo');
+  if (keys.length === 0) {
+    el.innerHTML = '暂无数据（该文件无塔顶通道）';
+    if (infoEl) infoEl.textContent = '未检测到塔顶载荷通道';
+    return;
+  }
+  const mUsed = {};
+  Object.values(fa).forEach(f => { if (f && f.m) mUsed[f.m] = 1; });
+  const mStr = Object.keys(mUsed).length ? Object.keys(mUsed).join(', ') : '-';
+  let rows = '';
+  keys.forEach(k => {
+    const s = ext[k] || {};
+    const f = fa[k] || {};
+    rows += `<tr><td>${chNames[k] || k}</td><td class="k-max">${fmtNum2(s.max)}</td><td class="k-time">${fmtT2(s.max_time)}</td><td class="k-min">${fmtNum2(s.min)}</td><td class="k-time">${fmtT2(s.min_time)}</td><td class="k-val">${fmtNum2(s.mean)}</td><td>${fmtNum2(s.std)}</td><td class="k-peak">${fmtNum2(f.del)}</td></tr>`;
+  });
+  el.innerHTML = `<table><thead><tr><th>载荷项</th><th>最大值</th><th>最大值发生时刻</th><th>最小值</th><th>最小值发生时刻</th><th>均值</th><th>标准差</th><th>等效疲劳载荷 DEL</th></tr></thead><tbody>${rows}</tbody></table>`;
+  if (infoEl) infoEl.textContent = `塔顶载荷通道：${keys.map(k => chNames[k] || k).join('；')}；等效疲劳载荷按 Wöhler 指数 m=${mStr} 计算`;
+  renderTowerChart();
+}
+
+function renderTowerChart() {
+  const tt = (results && results.tower_top);
+  if (!tt || !tt.channels || !tt.time) return;
+  const el = document.getElementById('towerChart');
+  if (!el) return;
+  if (!charts.tower) charts.tower = echarts.init(el);
+  const chKeys = Object.keys(tt.channels);
+  if (chKeys.length === 0) return;
+  const time = downsample(tt.time, 1200);
+  const n = time.length;
+  const series = chKeys.map(k => {
+    const vals = downsample(tt.channels[k] || [], 1200);
+    return {
+      name: k,
+      type: 'line',
+      showSymbol: false,
+      data: time.map((ti, i) => [ti, (vals[i] ?? 0)]),
+      lineStyle: {width: 1.5}
+    };
+  });
+  charts.tower.setOption({
+    tooltip: {trigger: 'axis'},
+    legend: {bottom: 0},
+    grid: {top: 30, left: 70, right: 20, bottom: 40},
+    xAxis: {type: 'value', min: time[0], max: time[time.length - 1], name: 't/s', axisLabel: {formatter: v => Math.round(v)}},
+    yAxis: {type: 'value', scale: true},
+    series
+  }, true);
+}
+
+// ============================================================
+// 批处理
+// ============================================================
+function openBatchDirBrowser() {
+  browserMode = 'dir';
+  document.getElementById('fileBrowserTitle').textContent = '选择工况目录';
+  document.getElementById('fileBrowserModal').classList.add('active');
+  document.getElementById('selectedFilePath').textContent = '将选择当前目录';
+  loadDrives();
+  loadDirectory(currentBrowserPath || browserPath('dir') || osPath());
+}
+
+async function runBatch() {
+  const directory = document.getElementById('batchDir').value.trim();
+  const cases_file = document.getElementById('batchCasesFile').value.trim();
+  if (!directory && !cases_file) { alert('请选择工况目录或填写清单文件路径'); return; }
+  const bladeM = parseFloat(document.getElementById('batchBladeM').value) || 10;
+  const towerM = parseFloat(document.getElementById('batchTowerM').value) || 3;
+  const btn = document.getElementById('batchRunBtn');
+  const statusEl = document.getElementById('batchStatus');
+  const resultEl = document.getElementById('batchResult');
+  btn.disabled = true;
+  statusEl.textContent = '批处理分析中...';
+  resultEl.innerHTML = '<div class="info-box">批处理进行中，请稍候（串行处理，大文件耗时较长）...</div>';
+  try {
+    const resp = await fetch('/api/batch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({directory, cases_file, include_panel: false, blade_m: bladeM, tower_m: towerM})
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    batchResults = data;
+    renderBatchResult(data);
+    document.getElementById('batchReportBtn').disabled = false;
+    statusEl.textContent = '完成 (' + (data.calc_time || '') + ')';
+    log('批处理完成，共 ' + (data.num_cases || 0) + ' 个工况');
+  } catch(e) {
+    statusEl.textContent = '失败: ' + e.message;
+    resultEl.innerHTML = '<div class="info-box" style="color:#c62828;">批处理失败: ' + e.message + '</div>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function envTable(records) {
+  if (!records || records.length === 0) return '<div class="info-box">无数据</div>';
+  const cols = Object.keys(records[0]);
+  const head = cols.map(c => `<th>${c}</th>`).join('');
+  const body = records.map(r => '<tr>' + cols.map(c => {
+    let v = r[c];
+    if (v === null || v === undefined) v = '-';
+    else if (typeof v === 'number') v = (Math.abs(v) < 0.01 && v !== 0) ? v.toExponential(2) : v.toFixed(2);
+    return `<td class="${keyCellClass(c)}">${v}</td>`;
+  }).join('') + '</tr>').join('');
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function renderBatchResult(data) {
+  const el = document.getElementById('batchResult');
+  if (!el) return;
+  const env = data.envelope || {};
+  const bladeM = env.blade_m != null ? env.blade_m : '10';
+  const towerM = env.tower_m != null ? env.tower_m : '3';
+  let html = '';
+
+  const cases = data.cases || [];
+  html += `<h4 style="font-size:13px; margin:10px 0 6px 0;">工况列表（${data.num_cases || cases.length} 个，叶片数 ${data.num_blades != null ? data.num_blades : '-'}）</h4>`;
+  if (cases.length) {
+    html += '<table><thead><tr><th>工况</th><th>DLC</th><th>文件名</th><th>类型</th><th>行×列</th><th>大小</th><th>权重</th></tr></thead><tbody>';
+    cases.forEach(c => {
+      html += `<tr><td>${c.label || c.case_id || '-'}</td><td>${c.dlc || '-'}</td><td>${c.filename || '-'}</td><td>${c.condition_type || '-'}</td><td>${c.num_rows || '-'}×${c.num_cols || '-'}</td><td>${c.size_mb != null ? c.size_mb + ' MB' : '-'}</td><td>${c.weight != null ? c.weight : 1}</td></tr>`;
+    });
+    html += '</tbody></table>';
+  }
+
+  const blades = env.blade || {};
+  if (Object.keys(blades).length) {
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">叶片极限载荷包络（上限/下限跨工况）</h4>`;
+    Object.keys(blades).forEach(bid => {
+      const b = blades[bid];
+      html += `<h5 style="font-size:12px; margin:8px 0 4px 0; color:#1565c0;">${bid}</h5>`;
+      html += envTable(b.extreme);
+    });
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">叶片疲劳载荷包络（Wöhler加权 m=${bladeM}）</h4>`;
+    Object.keys(blades).forEach(bid => {
+      const b = blades[bid];
+      html += `<h5 style="font-size:12px; margin:8px 0 4px 0; color:#1565c0;">${bid}</h5>`;
+      html += envTable(b.fatigue);
+    });
+  }
+
+  const tower = env.tower;
+  if (tower && ((tower.extreme && tower.extreme.length) || (tower.fatigue && tower.fatigue.length))) {
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">塔顶极限载荷包络（跨工况）</h4>`;
+    html += envTable(tower.extreme);
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">塔顶疲劳载荷包络（Wöhler加权 m=${towerM}）</h4>`;
+    html += envTable(tower.fatigue);
+  }
+
+  if (env.global_extreme && env.global_extreme.length) {
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">全局载荷极限包络（跨全部DLC）</h4>`;
+    html += envTable(env.global_extreme);
+  }
+  if (env.global_fatigue && env.global_fatigue.length) {
+    html += `<h4 style="font-size:13px; margin:14px 0 6px 0;">全局载荷疲劳包络</h4>`;
+    html += envTable(env.global_fatigue);
+  }
+
+  if (html === '') html = '<div class="info-box">批处理完成，无可用包络数据</div>';
+  el.innerHTML = html;
+}
+
+function openBatchReportModal() {
+  if (!batchResults) { alert('请先完成批处理分析'); return; }
+  const modal = document.getElementById('exportModal');
+  pendingExport = 'batch_report';
+  document.getElementById('exportModalTitle').textContent = '导出批处理分析报告';
+  const fmt = document.getElementById('reportFormat').value;
+  const ext = fmt === 'word' ? 'docx' : 'pdf';
+  document.getElementById('exportFileName').value = (getProjectName() || '批处理') + '_批处理分析报告.' + ext;
+  document.getElementById('exportDir').value = 'D:/1worksfiles/py/laoshan/ultrapost/VAWT_Load_Processing/output';
+  document.getElementById('exportModalMsg').textContent = '';
+  modal.classList.add('active');
+}
+
+window.addEventListener('resize', () => {
+
+  Object.values(charts).forEach(c => c && c.resize());
+
+});
+
+</script>
+
+<footer style="position:fixed; bottom:0; left:0; right:0; text-align:center; padding:8px 0; font-size:12px; color:#666; background:#f0f2f5; border-top:1px solid #d0d5dc; z-index:100;">
+
+  联系人：陈强，18958333315 | 最后更新于2026年8月31日
+
+</footer>
+
+</body>
+
+</html>
